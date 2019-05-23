@@ -1,0 +1,4 @@
+pluginManagement.repositories {
+	maven { url ('http://nexus.tutske.org:10080/repository/maven-public/') }
+}
+rootProject.name = 'org.tutske.libs.api'
