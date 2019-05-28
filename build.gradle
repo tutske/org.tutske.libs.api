@@ -9,7 +9,7 @@ targetCompatibility = '11'
 
 dependencies {
 	api (
-		[ group: 'org.slf4j', name: 'slf4j-api', version: '[1.7,1.8]' ],
+		[ group: 'org.slf4j', name: 'slf4j-api', version: '[1.7,2)' ],
 		[ group: 'org.tutske.libs', name: 'org.tutske.libs.utils', version: '[a.3.0,)' ],
 		[ group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '[1,)' ],
 		[ group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '[1,)' ],
