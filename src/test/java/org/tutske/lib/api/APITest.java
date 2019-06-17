@@ -193,4 +193,22 @@ public class APITest {
 		assertThat (id, is ("user"));
 	}
 
+	@Test
+	public void it_should_split_a_descriptor () {
+		String [] parts = API.splitParts ("/path/to/file.ext");
+		assertThat (parts, arrayContaining ("path", "to", "file.ext"));
+	}
+
+
+	@Test (expected = Exception.class)
+	public void it_should_complain_when_it_ends_with_a_trailing_slash () {
+		API.splitParts ("/path/to/dir/");
+	}
+
+	@Test
+	public void it_should_not_complain_when_save_splitting_a_descriptor () {
+		String [] parts = API.saveSplitParts ("/path/to/dir/");
+		assertThat (parts, arrayContaining ("path", "to", "dir"));
+	}
+
 }

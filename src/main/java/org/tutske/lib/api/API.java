@@ -36,6 +36,11 @@ public class API<REQ, RES> {
 		return api.router;
 	}
 
+	public static String [] saveSplitParts (String descriptor) {
+		if ( ! descriptor.endsWith ("/") ) { return splitParts (descriptor); }
+		else { return splitParts (descriptor.substring (0, descriptor.length () - 1)); }
+	}
+
 	public static String [] splitParts (String descriptor) {
 		if ( ! descriptor.startsWith ("/") ) {
 			throw new RuntimeException ("descriptor should start with '/': " + descriptor);
