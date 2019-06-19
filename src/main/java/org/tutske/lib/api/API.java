@@ -285,9 +285,13 @@ public class API<REQ, RES> {
 	}
 
 	private static <REQ, RES> RouteDescription<REQ, RES> find (Map<String, Object> data, Method method, String version, String [] parts) {
+		List<Object> candidates = new LinkedList<> ();
+
 		boolean needsTail = false;
 		for ( String part : parts ) {
 			Object retrieved = data.get (part);
+
+			if ( data.containsKey ("*") ) { candidates.add (0, data.get ("*")); }
 
 			if ( retrieved == null ) { retrieved = data.get ("*"); }
 			if ( retrieved == null ) { needsTail = true; break; }
@@ -296,14 +300,21 @@ public class API<REQ, RES> {
 			data = (Map) retrieved;
 		}
 
-		Object retrieved = data.get (method + ":" + version);
-		if ( retrieved == null ) { retrieved = data.get (method + ":"); }
+		candidates.add (0, data);
 
-		if ( ! (retrieved instanceof RouteDescription) ) { return null; }
+		for ( Object entry : candidates ) {
+			Map<String, Object> candidate = (Map) entry;
 
-		RouteDescription<REQ, RES> descriptor = (RouteDescription) retrieved;
-		if ( needsTail && ! descriptor.hasTail ) { return null; }
-		return descriptor;
+			Object retrieved = candidate.get (method + ":" + version);
+			if ( retrieved == null ) { retrieved = candidate.get (method + ":"); }
+			if ( retrieved == null ) { continue; }
+
+			RouteDescription<REQ, RES> descriptor = (RouteDescription) retrieved;
+			if ( needsTail && descriptor.hasTail ) { return descriptor; }
+			else if ( ! needsTail ) { return descriptor; }
+		}
+
+		return null;
 	}
 
 	private static String linkTo (RouteDescription<?, ?> description, Map<String, Object> params) {

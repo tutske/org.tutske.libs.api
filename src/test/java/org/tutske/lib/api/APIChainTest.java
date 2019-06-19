@@ -18,6 +18,28 @@ public class APIChainTest {
 	Consumer<String> notify = mock (Consumer.class);
 
 	@Test
+	public void it_should_find_catch_all_options_route () {
+		ApiRouter<String, String> router = API.configure (api -> {
+			api.route ("/::path", req -> "all");
+			api.route ("/other", req -> "blocking");
+		});
+
+		Function<String, String> chain = router.createChain (Request.Method.GET, "current", "/other/path", API.splitParts ("/other/path"));
+		assertThat (chain.apply ("John"), is ("all"));
+	}
+
+	@Test
+	public void it_should_take_the_specific_route () {
+		ApiRouter<String, String> router = API.configure (api -> {
+			api.route ("/::path", req -> "all");
+			api.route ("/other", req -> "blocking");
+		});
+
+		Function<String, String> chain = router.createChain (Request.Method.GET, "current", "/other", API.splitParts ("/other"));
+		assertThat (chain.apply ("John"), is ("blocking"));
+	}
+
+	@Test
 	public void it_should_not_give_a_filter_when_no_target_can_be_found () {
 		ApiRouter<String, String> router = API.configure (api -> {
 		});
