@@ -37,7 +37,8 @@ public class API<REQ, RES> {
 	}
 
 	public static String [] saveSplitParts (String descriptor) {
-		if ( ! descriptor.endsWith ("/") ) { return splitParts (descriptor); }
+		if ( descriptor.equals ("/") ) { return new String [] { "" }; }
+		else if ( ! descriptor.endsWith ("/") ) { return splitParts (descriptor); }
 		else { return splitParts (descriptor.substring (0, descriptor.length () - 1)); }
 	}
 
