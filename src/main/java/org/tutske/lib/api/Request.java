@@ -55,10 +55,9 @@ public interface Request {
 	public Method getMethod ();
 	public String getUri ();
 
-	public String getHeader (String header);
-
 	public Bag<String, String> pathParams ();
 	public Bag<String, String> queryParams ();
+	public Bag<String, String> headers ();
 	public Bag<String, Object> context ();
 
 	public void setHeader (String header, String value);
