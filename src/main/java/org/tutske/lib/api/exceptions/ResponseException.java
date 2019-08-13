@@ -70,9 +70,9 @@ public class ResponseException extends RuntimeException {
 		@Override public void serialize (ResponseException value, JsonGenerator gen, SerializerProvider provider)
 		throws IOException {
 			gen.writeStartObject ();
+			gen.writeNumberField ("status", value.getStatusCode ());
 			gen.writeStringField ("type", value.toTypeUrl (null, null));
 			gen.writeStringField ("title", value.title);
-			gen.writeNumberField ("status", value.getStatusCode ());
 			gen.writeStringField ("detail", value.getMessage ());
 			for ( Map.Entry<String, Object> entry : value.data.entrySet () ) {
 				gen.writeObjectField (entry.getKey (), entry.getValue ());
