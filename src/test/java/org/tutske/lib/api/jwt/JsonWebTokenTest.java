@@ -1,11 +1,12 @@
 package org.tutske.lib.api.jwt;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 
 import java.util.Base64;
@@ -130,7 +131,7 @@ public class JsonWebTokenTest {
 
 	@Test (expected = IllegalArgumentException.class)
 	public void it_should_complain_when_creating_a_token_with_incorrect_parts () {
-		new JsonWebToken (new byte [2288][]);
+		new JsonWebToken (new ObjectMapper (), new byte [2288][]);
 	}
 
 	@Test (expected = IllegalArgumentException.class)

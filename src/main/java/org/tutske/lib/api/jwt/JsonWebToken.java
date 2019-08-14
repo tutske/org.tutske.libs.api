@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.tutske.lib.utils.Exceptions;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Base64;
@@ -16,7 +17,7 @@ import java.util.function.Function;
 
 public class JsonWebToken {
 
-	private static ObjectMapper mapper = new ObjectMapper ()
+	private static ObjectMapper DEFAULT_MAPPER = new ObjectMapper ()
 		.registerModule (new Jdk8Module ())
 		.registerModule (new JavaTimeModule ())
 		.disable (DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
@@ -28,13 +29,17 @@ public class JsonWebToken {
 	}
 
 	public static final String DEFAULT_HEADER = "{\"alg\":\"HS256\",\"typ\":\"JWT\"}";
-	private static final JsonWebToken EMPTY_WEB_TOKEN = new JsonWebToken (createEmptyData ());
+	private static final JsonWebToken EMPTY_WEB_TOKEN = new JsonWebToken (DEFAULT_MAPPER, createEmptyData ());
 	private static final Charset utf8 = Charset.forName ("utf-8");
 
 	private static final Base64.Decoder decoder = Base64.getUrlDecoder ();
 	private static final Base64.Encoder encoder = Base64.getUrlEncoder ();
 
 	public static JsonWebToken fromString (String token) {
+		return fromMappedString (DEFAULT_MAPPER, token);
+	}
+
+	public static JsonWebToken fromMappedString (ObjectMapper mapper, String token) {
 		if ( token == null ) { return EMPTY_WEB_TOKEN; }
 
 		String [] parts = token.split ("\\.");
@@ -55,10 +60,23 @@ public class JsonWebToken {
 			throw new IllegalArgumentException ("Token `" + token + "` has wrong number of parts.");
 		}
 
-		return new JsonWebToken (data);
+		return new JsonWebToken (mapper, data);
+	}
+
+	public static JsonWebToken fromData (Object header, Object data) {
+		return fromMappedData (DEFAULT_MAPPER, header, data);
+	}
+
+	public static JsonWebToken fromMappedData (ObjectMapper mapper, Object header, Object data) {
+		try { return fromData (mapper.writeValueAsString (header), mapper.writeValueAsString (data)); }
+		catch ( Exception e ) { throw Exceptions.wrap (e); }
 	}
 
 	public static JsonWebToken fromData (Object data) {
+		return fromMappedData (DEFAULT_MAPPER, data);
+	}
+
+	public static JsonWebToken fromMappedData (ObjectMapper mapper, Object data) {
 		try { return fromData (mapper.writeValueAsString (data)); }
 		catch ( Exception e ) { throw Exceptions.wrap (e); }
 	}
@@ -67,8 +85,16 @@ public class JsonWebToken {
 		return fromData (DEFAULT_HEADER, json);
 	}
 
+	public static JsonWebToken fromMappedData (ObjectMapper mapper, String json) {
+		return fromMappedData (mapper, DEFAULT_HEADER, json);
+	}
+
 	public static JsonWebToken fromData (String header, String json) {
-		return new JsonWebToken (new byte [][] {
+		return fromMappedData (DEFAULT_MAPPER, header, json);
+	}
+
+	public static JsonWebToken fromMappedData (ObjectMapper mapper, String header, String json) {
+		return new JsonWebToken (mapper, new byte [][] {
 			header.getBytes (utf8), {}, {}, json.getBytes (utf8), {}
 		});
 	}
@@ -81,12 +107,14 @@ public class JsonWebToken {
 		return data;
 	}
 
+	private final ObjectMapper mapper;
 	private final byte [][] data;
 
-	public JsonWebToken (byte [][] data) {
+	public JsonWebToken (ObjectMapper mapper, byte [][] data) {
 		if ( data.length != Keys.values ().length ) {
 			throw new IllegalArgumentException ("data does not have required fields");
 		}
+		this.mapper = mapper;
 		this.data = data;
 	}
 
@@ -110,15 +138,28 @@ public class JsonWebToken {
 		return part != null && part.length != 0;
 	}
 
+	public JsonWebToken with (Keys key, Object data) {
+		try { return with (key, mapper.writeValueAsBytes (data)); }
+		catch ( IOException e ) { throw Exceptions.wrap (e); }
+	}
+
+	public JsonWebToken with (Keys key, String data) {
+		return with (key, data.getBytes (utf8));
+	}
+
 	public JsonWebToken with (Keys key, byte [] field) {
 		byte [][] data = new byte [this.data.length][];
 		for ( Keys k : Keys.values () ) {
-			if ( k == key) { continue; }
+			if ( k == key ) { continue; }
 			byte [] retrieved = get (k);
 			data[k.ordinal ()] = Arrays.copyOf (retrieved, retrieved.length);
 		}
 		data[key.ordinal ()] = field;
-		return new JsonWebToken (data);
+		return new JsonWebToken (mapper, data);
+	}
+
+	public JsonWebToken withMapper (ObjectMapper mapper) {
+		return new JsonWebToken (mapper, data);
 	}
 
 	public String getPayload () {
