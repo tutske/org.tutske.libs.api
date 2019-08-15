@@ -96,63 +96,59 @@ public class JwtValidator {
 	}
 
 	public void assureValid (JsonWebToken token, Config config) {
-		if ( token == null && config.forceToken ) {
-			throw new InvalidJwtException ("Jwt token is empty or missing");
-		}
+		if ( token == null && config.forceToken ) throw new InvalidJwtException (
+			"Jwt token is empty or missing"
+		);
 
 		if ( token == null ) { return; }
 
 		String authorization = token.get (JsonWebToken.Keys.Authentication, String.class);
-		if ( ! config.validate.apply (token, authorization) ) {
-			throw new InvalidJwtException ("Token is not issued by a trusted source, validation does not match",
-				new ExceptionData () {{ put ("token", token); put ("authorzitanio", authorization); }})
-			;
-		}
+		if ( ! config.validate.apply (token, authorization) ) throw new InvalidJwtException (
+			"Token is not issued by a trusted source, validation does not match",
+			new ExceptionData () {{ put ("token", token); put ("authorization", authorization); }}
+		);
 
 		Timed timed = getTimes (token);
 		Instant now = clock.instant ();
 
-		if ( config.forceEXP && timed.exp == null ) {
-			throw new InvalidJwtException ("No expiration time present", new ExceptionData () {{
-				put ("token", token.get (JsonWebToken.Keys.Payload, String.class));
-			}});
-		}
+		if ( config.forceEXP && timed.exp == null ) throw new InvalidJwtException (
+			"No expiration time present",
+			new ExceptionData () {{ put ("token", token); }}
+		);
 
-		if ( timed.exp != null && timed.exp.isBefore (now) ) {
-			throw new InvalidJwtException ("Expiration time is not valid", new ExceptionData () {{
-				put ("token", token.get (JsonWebToken.Keys.Payload, String.class));
+		if ( timed.exp != null && timed.exp.isBefore (now) ) throw new InvalidJwtException (
+			"Expiration time is not valid", new ExceptionData () {{
+				put ("now", now);
 				put ("exp", timed.exp);
+				put ("token", token);
+			}}
+		);
+
+		if ( config.forceIAT && timed.iat == null ) throw new InvalidJwtException (
+			"No issued at time present",
+			new ExceptionData () {{ put ("token", token); }}
+		);
+
+		if ( timed.iat != null && timed.iat.isAfter (now) ) throw new InvalidJwtException (
+			"Issued at time is not valid", new ExceptionData () {{
 				put ("now", now);
-			}});
-		}
-
-		if ( config.forceIAT && timed.iat == null ) {
-			throw new InvalidJwtException ("No issued at time present", new ExceptionData () {{
-				put ("token", token.get (JsonWebToken.Keys.Payload, String.class));
-			}});
-		}
-
-		if ( timed.iat != null && timed.iat.isAfter (now) ) {
-			throw new InvalidJwtException ("Issued at time is not valid", new ExceptionData () {{
-				put ("token", token.get (JsonWebToken.Keys.Payload, String.class));
 				put ("iat", timed.iat);
+				put ("token", token);
+			}}
+		);
+
+		if ( config.forceNBT && timed.nbt == null ) throw new InvalidJwtException (
+			"No not before time present",
+			new ExceptionData () {{ put ("token", token); }}
+		);
+
+		if ( timed.nbt != null && timed.nbt.isAfter (now) ) throw new InvalidJwtException (
+			"Not before time is not valid", new ExceptionData () {{
 				put ("now", now);
-			}});
-		}
-
-		if ( config.forceNBT && timed.nbt == null ) {
-			throw new InvalidJwtException ("No not before time present", new ExceptionData () {{
-				put ("token", token.get (JsonWebToken.Keys.Payload, String.class));
-			}});
-		}
-
-		if ( timed.nbt != null && timed.nbt.isAfter (now) ) {
-			throw new InvalidJwtException ("Not before time is not valid", new ExceptionData () {{
-				put ("token", token.get (JsonWebToken.Keys.Payload, String.class));
 				put ("nbt", timed.nbt);
-				put ("now", now);
-			}});
-		}
+				put ("token", token);
+			}}
+		);
 	}
 
 	private Timed getTimes (JsonWebToken token) {
