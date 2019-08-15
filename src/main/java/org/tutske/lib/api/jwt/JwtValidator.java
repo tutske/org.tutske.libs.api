@@ -159,7 +159,7 @@ public class JwtValidator {
 		return token.getPayload (Timed.class);
 	}
 
-	private static class Timed {
+	public static class Timed {
 		public Instant exp;
 		public Instant iat;
 		public Instant nbt;
