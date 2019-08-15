@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.tutske.lib.utils.Exceptions;
@@ -177,6 +178,15 @@ public class JsonWebToken {
 	public <T> T getPayload (Class<T> clazz) {
 		try { return mapper.readValue (getPayload (), clazz); }
 		catch ( Exception e ) { throw Exceptions.wrap (e); }
+	}
+
+	public ObjectNode getJsonPayload () {
+		try { return (ObjectNode) mapper.readTree (get (Keys.Payload)); }
+		catch ( IOException e ) { throw Exceptions.wrap (e); }
+	}
+
+	public <T> T getJsonPayload (Function<ObjectNode, T> fn) {
+		return fn.apply (getJsonPayload ());
 	}
 
 	@Override
