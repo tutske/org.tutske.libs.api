@@ -122,6 +122,10 @@ public class JsonWebToken {
 		return data[key.ordinal ()];
 	}
 
+	public String getEncoded (Keys key) {
+		return encoder.encodeToString (get (key));
+	}
+
 	public <T> T get (Keys key, Class<T> clazz) {
 		if ( String.class.equals (clazz) ) { return (T) new String (get (key)); }
 		try { return mapper.readValue (get (key), clazz); }
