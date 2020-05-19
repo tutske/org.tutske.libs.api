@@ -1,14 +1,19 @@
 package org.tutske.lib.api.exceptions;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import org.tutske.lib.json.JsonException;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Map;
 
 
-public class ResponseException extends RuntimeException {
+public class ResponseException extends JsonException {
 
 	private static String BASE_HOST = null;
 	private static String BASE_URL = null;
@@ -26,13 +31,12 @@ public class ResponseException extends RuntimeException {
 		}
 	}
 
-	protected final ExceptionData data = new ExceptionData ();
 	protected String type;
 	protected String title;
 	protected int status;
 
 	{
-		type = "/interal_server_error";
+		type = "/internal_server_error";
 		title = "Internal Server Error";
 		status = 500;
 	}
@@ -42,20 +46,15 @@ public class ResponseException extends RuntimeException {
 	public ResponseException (String message, Throwable cause) { super (message, cause); }
 	public ResponseException (Throwable cause) { super (cause); }
 
-	public ResponseException (ExceptionData data) {
-		this.data.putAll (data);
-	}
-	public ResponseException (String message, ExceptionData data) {
-		this (message);
-		this.data.putAll (data);
+	public ResponseException (ObjectNode data) { super (data); }
+	public ResponseException (String message, ObjectNode data) { super (message, data); }
+	public ResponseException (int status, String message, ObjectNode data) {
+		super (message, data);
+		this.status = status;
 	}
 
 	public int getStatusCode () {
 		return this.status;
-	}
-
-	public void addExtra (ExceptionData extra) {
-		this.data.putAll (extra);
 	}
 
 	public String toTypeUrl (String baseHost, String baseUrl) {
@@ -64,8 +63,8 @@ public class ResponseException extends RuntimeException {
 		return h + b + (type.startsWith ("/") ? type : "/" + type);
 	}
 
-	public static class ResponseExceptionSerializer extends StdSerializer<ResponseException> {
-		public ResponseExceptionSerializer () { super (ResponseException.class); }
+	public static class JacksonSerializer extends StdSerializer<ResponseException> {
+		public JacksonSerializer () { super (ResponseException.class); }
 
 		@Override public void serialize (ResponseException value, JsonGenerator gen, SerializerProvider provider)
 		throws IOException {
@@ -74,11 +73,19 @@ public class ResponseException extends RuntimeException {
 			gen.writeStringField ("type", value.toTypeUrl (null, null));
 			gen.writeStringField ("title", value.title);
 			gen.writeStringField ("detail", value.getMessage ());
-			for ( Map.Entry<String, Object> entry : value.data.entrySet () ) {
-				gen.writeObjectField (entry.getKey (), entry.getValue ());
+
+			Iterator<Map.Entry<String, JsonNode>> it = value.data.fields ();
+			while ( it.hasNext () ) {
+				Map.Entry<String, JsonNode> field = it.next ();
+				gen.writeObjectField (field.getKey (), field.getValue ());
 			}
+
 			gen.writeEndObject ();
 		}
+	}
+
+	public static void configureJacksonMapper (SimpleModule module) {
+		module.addSerializer (ResponseException.class, new JacksonSerializer ());
 	}
 
 }

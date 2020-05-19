@@ -1,6 +1,9 @@
 package org.tutske.lib.api.exceptions;
 
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+
 public class WrongValueException extends ResponseException {
 
 	{
@@ -9,27 +12,12 @@ public class WrongValueException extends ResponseException {
 		status = 417;
 	}
 
-	public WrongValueException () {
-	}
+	public WrongValueException () { super (); }
+	public WrongValueException (String message) { super (message); }
+	public WrongValueException (String message, Throwable cause) { super (message, cause); }
+	public WrongValueException (Throwable cause) { super (cause); }
 
-	public WrongValueException (String message) {
-		super (message);
-	}
-
-	public WrongValueException (String message, Throwable cause) {
-		super (message, cause);
-	}
-
-	public WrongValueException (Throwable cause) {
-		super (cause);
-	}
-
-	public WrongValueException (ExceptionData data) {
-		super (data);
-	}
-
-	public WrongValueException (String message, ExceptionData data) {
-		super (message, data);
-	}
+	public WrongValueException (ObjectNode data) { super (data); }
+	public WrongValueException (String message, ObjectNode data) { super (message, data); }
 
 }

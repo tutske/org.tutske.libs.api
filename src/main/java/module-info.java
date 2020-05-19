@@ -5,8 +5,9 @@ module org.tutske.libs.api {
 	exports org.tutske.lib.api.jwt;
 
 	/* explicit modules */
-	requires org.tutske.libs.utils;
 	requires org.slf4j;
+	requires org.tutske.libs.json;
+	requires org.tutske.libs.utils;
 
 	/* named automatic modules */
 	requires com.fasterxml.jackson.core;

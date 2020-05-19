@@ -1,5 +1,7 @@
 package org.tutske.lib.api.exceptions;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 
 public class AuthorizationFailure extends ResponseException {
 
@@ -9,27 +11,13 @@ public class AuthorizationFailure extends ResponseException {
 		status = 403;
 	}
 
-	public AuthorizationFailure () {
-	}
 
-	public AuthorizationFailure (String message) {
-		super (message);
-	}
+	public AuthorizationFailure () { super (); }
+	public AuthorizationFailure (String message) { super (message); }
+	public AuthorizationFailure (String message, Throwable cause) { super (message, cause); }
+	public AuthorizationFailure (Throwable cause) { super (cause); }
 
-	public AuthorizationFailure (String message, Throwable cause) {
-		super (message, cause);
-	}
-
-	public AuthorizationFailure (Throwable cause) {
-		super (cause);
-	}
-
-	public AuthorizationFailure (ExceptionData data) {
-		super (data);
-	}
-
-	public AuthorizationFailure (String message, ExceptionData data) {
-		super (message, data);
-	}
+	public AuthorizationFailure (ObjectNode data) { super (data); }
+	public AuthorizationFailure (String message, ObjectNode data) { super (message, data); }
 
 }

@@ -11,6 +11,7 @@ dependencies {
 	api (
 		[ group: 'org.slf4j', name: 'slf4j-api', version: '[1.7,2)' ],
 		[ group: 'org.tutske.libs', name: 'org.tutske.libs.utils', version: '[a.3.0,)' ],
+		[ group: 'org.tutske.libs', name: 'org.tutske.libs.json', version: '[a.2.0,)' ],
 		[ group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '[1,)' ],
 		[ group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '[1,)' ],
 		[ group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '[1,)' ]

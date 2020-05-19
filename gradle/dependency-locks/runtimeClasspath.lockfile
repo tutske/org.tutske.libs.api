@@ -7,4 +7,5 @@ com.fasterxml.jackson.core:jackson-databind:2.9.9
 com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.9.9
 com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.9
 org.slf4j:slf4j-api:1.8.0-beta4
-org.tutske.libs:org.tutske.libs.utils:a.3.0
+org.tutske.libs:org.tutske.libs.json:a.2.0
+org.tutske.libs:org.tutske.libs.utils:a.3.2-pre-8-g26242a3

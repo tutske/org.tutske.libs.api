@@ -1,6 +1,7 @@
 package org.tutske.lib.api.jwt;
 
-import org.tutske.lib.api.exceptions.ExceptionData;
+import static org.tutske.lib.json.Json.objectNode;
+
 import org.tutske.lib.api.exceptions.InvalidJwtException;
 
 import java.time.Clock;
@@ -75,16 +76,16 @@ public class JwtValidator {
 	public void assureValid (String header, Config config) {
 		if ( header == null || header.isEmpty () ) {
 			if ( ! config.forceToken ) { return; }
-			throw new InvalidJwtException ("No authorization token provided", new ExceptionData () {{
-				put ("token", header == null ? "missing" : header);
-			}});
+			throw new InvalidJwtException ("No authorization token provided",
+				objectNode ("token", header == null ? "missing" : header)
+			);
 		}
 
 		JsonWebToken token;
 		try { token = JsonWebToken.fromString (header); }
 		catch (Exception ignore) {
 			throw new InvalidJwtException ("Failed to parse header " + header+ " as jwt.",
-				new ExceptionData () {{ put ("token", header); }}
+				objectNode ("token", header)
 			);
 		}
 
@@ -105,7 +106,7 @@ public class JwtValidator {
 		String authorization = token.get (JsonWebToken.Keys.Authentication, String.class);
 		if ( ! config.validate.apply (token, authorization) ) throw new InvalidJwtException (
 			"Token is not issued by a trusted source, validation does not match",
-			new ExceptionData () {{ put ("token", token); put ("authorization", authorization); }}
+			objectNode ("token", token, "authorization", authorization)
 		);
 
 		Timed timed = getTimes (token);
@@ -113,41 +114,41 @@ public class JwtValidator {
 
 		if ( config.forceEXP && timed.exp == null ) throw new InvalidJwtException (
 			"No expiration time present",
-			new ExceptionData () {{ put ("token", token); }}
+			objectNode ("token", token)
 		);
 
 		if ( timed.exp != null && timed.exp.isBefore (now) ) throw new InvalidJwtException (
-			"Expiration time is not valid", new ExceptionData () {{
-				put ("now", now);
-				put ("exp", timed.exp);
-				put ("token", token);
-			}}
+			"Expiration time is not valid", objectNode (
+				"now", now,
+				"exp", timed.exp,
+				"token", token
+			)
 		);
 
 		if ( config.forceIAT && timed.iat == null ) throw new InvalidJwtException (
 			"No issued at time present",
-			new ExceptionData () {{ put ("token", token); }}
+			objectNode ("token", token)
 		);
 
 		if ( timed.iat != null && timed.iat.isAfter (now) ) throw new InvalidJwtException (
-			"Issued at time is not valid", new ExceptionData () {{
-				put ("now", now);
-				put ("iat", timed.iat);
-				put ("token", token);
-			}}
+			"Issued at time is not valid", objectNode (
+				"now", now,
+				"iat", timed.iat,
+				"token", token
+			)
 		);
 
 		if ( config.forceNBT && timed.nbt == null ) throw new InvalidJwtException (
 			"No not before time present",
-			new ExceptionData () {{ put ("token", token); }}
+			objectNode ("token", token)
 		);
 
 		if ( timed.nbt != null && timed.nbt.isAfter (now) ) throw new InvalidJwtException (
-			"Not before time is not valid", new ExceptionData () {{
-				put ("now", now);
-				put ("nbt", timed.nbt);
-				put ("token", token);
-			}}
+			"Not before time is not valid", objectNode (
+				"now", now,
+				"nbt", timed.nbt,
+				"token", token
+			)
 		);
 	}
 

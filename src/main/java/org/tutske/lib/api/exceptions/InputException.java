@@ -1,5 +1,7 @@
 package org.tutske.lib.api.exceptions;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 
 public class InputException extends ResponseException {
 
@@ -9,28 +11,12 @@ public class InputException extends ResponseException {
 		status = 417;
 	}
 
-	public InputException () {
-		this ("Invalid input.");
-	}
+	public InputException () { this ("Invalid input provided."); }
+	public InputException (String message) { super (message); }
+	public InputException (String message, Throwable cause) { super (message, cause); }
+	public InputException (Throwable cause) { super (cause); }
 
-	public InputException (String message) {
-		super (message);
-	}
-
-	public InputException (String message, Throwable cause) {
-		super (message, cause);
-	}
-
-	public InputException (Throwable cause) {
-		super (cause);
-	}
-
-	public InputException (ExceptionData data) {
-		super (data);
-	}
-
-	public InputException (String message, ExceptionData data) {
-		super (message, data);
-	}
+	public InputException (ObjectNode data) { super (data); }
+	public InputException (String message, ObjectNode data) { super (message, data); }
 
 }
