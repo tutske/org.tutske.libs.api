@@ -1,11 +1,8 @@
 plugins {
-	id "org.tutske.gradle" version 'a.2.2'
+	id "org.tutske.gradle" version 'a.2.3'
 }
 
 group = 'org.tutske.libs'
-
-sourceCompatibility = '11'
-targetCompatibility = '11'
 
 dependencies {
 	api (
@@ -16,7 +13,7 @@ dependencies {
 		[ group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '[1,)' ],
 		[ group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '[1,)' ]
 	)
-	testCompile (
+	testImplementation (
 		[ group: 'junit', name: 'junit', version: '[4,)'],
 		[ group: 'org.hamcrest', name: 'hamcrest-all', version: '[1,)' ],
 		[ group: 'org.mockito', name: 'mockito-all', version: '[1,)' ]
