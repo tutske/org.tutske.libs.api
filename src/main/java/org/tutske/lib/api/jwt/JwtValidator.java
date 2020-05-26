@@ -82,7 +82,7 @@ public class JwtValidator {
 		}
 
 		JsonWebToken token;
-		try { token = JsonWebToken.fromString (header); }
+		try { token = JsonWebToken.fromTokenString (header); }
 		catch (Exception ignore) {
 			throw new InvalidJwtException ("Failed to parse header " + header+ " as jwt.",
 				objectNode ("token", header)

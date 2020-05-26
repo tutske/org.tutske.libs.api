@@ -15,34 +15,35 @@ import java.util.function.Function;
 
 public class JsonWebToken {
 
-	private static ObjectMapper DEFAULT_MAPPER = Mappers.mapper ();
-
 	public static enum Keys {
 		Headers, EncryptedKey, Iv, Payload, Authentication
 	}
 
-	public static final String DEFAULT_HEADER = "{\"alg\":\"HS256\",\"typ\":\"JWT\"}";
+	private static final byte [] DEFAULT_HEADER = "{\"alg\":\"HS256\",\"typ\":\"JWT\"}".getBytes (StandardCharsets.UTF_8);
+	private static final ObjectMapper DEFAULT_MAPPER = Mappers.mapper ();
 	private static final JsonWebToken EMPTY_WEB_TOKEN = new JsonWebToken (DEFAULT_MAPPER, createEmptyData ());
 
 	private static final Base64.Decoder decoder = Base64.getUrlDecoder ();
 	private static final Base64.Encoder encoder = Base64.getUrlEncoder ();
 
-	public static JsonWebToken fromData (String json) {
-		return fromData (DEFAULT_HEADER, json);
+	public static JsonWebToken emptyToken () {
+		return EMPTY_WEB_TOKEN;
 	}
 
-	public static JsonWebToken fromData (String header, String json) {
-		return fromMappedData (DEFAULT_MAPPER, header, json);
+	public static JsonWebToken fromJson (String json) {
+		return fromBytes (DEFAULT_HEADER, json.getBytes (StandardCharsets.UTF_8));
 	}
 
-	public static JsonWebToken fromMappedData (ObjectMapper mapper, String json) {
-		return fromMappedData (mapper, DEFAULT_HEADER, json);
+	public static JsonWebToken fromJson (String header, String json) {
+		return fromBytes (header.getBytes (StandardCharsets.UTF_8), json.getBytes (StandardCharsets.UTF_8));
 	}
 
-	public static JsonWebToken fromMappedData (ObjectMapper mapper, String header, String json) {
-		return new JsonWebToken (mapper, new byte [][] {
-			header.getBytes (StandardCharsets.UTF_8), {}, {}, json.getBytes (StandardCharsets.UTF_8), {}
-		});
+	public static JsonWebToken fromMappedJson (ObjectMapper mapper, String json) {
+		return fromMappedBytes (mapper, DEFAULT_HEADER, json.getBytes (StandardCharsets.UTF_8));
+	}
+
+	public static JsonWebToken fromMappedJson (ObjectMapper mapper, String header, String json) {
+		return fromMappedBytes (mapper, header.getBytes (StandardCharsets.UTF_8), json.getBytes (StandardCharsets.UTF_8));
 	}
 
 	public static JsonWebToken fromData (Object data) {
@@ -54,21 +55,21 @@ public class JsonWebToken {
 	}
 
 	public static JsonWebToken fromMappedData (ObjectMapper mapper, Object data) {
-		try { return fromData (mapper.writeValueAsString (data)); }
+		try { return fromMappedBytes (mapper, DEFAULT_HEADER, mapper.writeValueAsBytes (data)); }
 		catch ( Exception e ) { throw Exceptions.wrap (e); }
 	}
 
 	public static JsonWebToken fromMappedData (ObjectMapper mapper, Object header, Object data) {
-		try { return fromData (mapper.writeValueAsString (header), mapper.writeValueAsString (data)); }
+		try { return fromMappedBytes (mapper, mapper.writeValueAsBytes (header), mapper.writeValueAsBytes (data)); }
 		catch ( Exception e ) { throw Exceptions.wrap (e); }
 	}
 
-	public static JsonWebToken fromString (String token) {
-		return fromMappedString (DEFAULT_MAPPER, token);
+	public static JsonWebToken fromTokenString (String token) {
+		return fromTokenString (DEFAULT_MAPPER, token);
 	}
 
-	public static JsonWebToken fromMappedString (ObjectMapper mapper, String token) {
-		if ( token == null ) { return EMPTY_WEB_TOKEN; }
+	public static JsonWebToken fromTokenString (ObjectMapper mapper, String token) {
+		if ( token == null || token.isBlank () ) { return EMPTY_WEB_TOKEN; }
 
 		String [] parts = token.split ("\\.");
 		byte [][] data = createEmptyData ();
@@ -91,11 +92,26 @@ public class JsonWebToken {
 		return new JsonWebToken (mapper, data);
 	}
 
+	public static JsonWebToken fromBytes (byte [] header, byte [] payload) {
+		return fromMappedBytes (DEFAULT_MAPPER, header, payload);
+	}
+
+	public static JsonWebToken fromMappedBytes (ObjectMapper mapper, byte [] header, byte [] payload) {
+		byte [][] data = createEmptyData ();
+		data[Keys.Headers.ordinal ()] = Arrays.copyOf (header, header.length);
+		data[Keys.Payload.ordinal ()] = Arrays.copyOf (payload, payload.length);
+		return new JsonWebToken (mapper, data);
+	}
+
 	private static byte [][] createEmptyData () {
 		byte [][] data = new byte [Keys.values ().length][];
-		for ( Keys key : Keys.values () ) {
-			data[key.ordinal ()] = new byte [] {};
-		}
+
+		data[Keys.Headers.ordinal ()] = DEFAULT_HEADER;
+		data[Keys.EncryptedKey.ordinal ()] = new byte [] {};
+		data[Keys.Iv.ordinal ()] = new byte [] {};
+		data[Keys.Payload.ordinal ()] = new byte [] { '{', '}'};
+		data[Keys.Authentication.ordinal ()] = new byte [] {};
+
 		return data;
 	}
 
