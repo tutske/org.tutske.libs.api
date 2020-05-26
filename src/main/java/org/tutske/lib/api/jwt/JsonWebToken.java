@@ -27,6 +27,42 @@ public class JsonWebToken {
 	private static final Base64.Decoder decoder = Base64.getUrlDecoder ();
 	private static final Base64.Encoder encoder = Base64.getUrlEncoder ();
 
+	public static JsonWebToken fromData (String json) {
+		return fromData (DEFAULT_HEADER, json);
+	}
+
+	public static JsonWebToken fromData (String header, String json) {
+		return fromMappedData (DEFAULT_MAPPER, header, json);
+	}
+
+	public static JsonWebToken fromMappedData (ObjectMapper mapper, String json) {
+		return fromMappedData (mapper, DEFAULT_HEADER, json);
+	}
+
+	public static JsonWebToken fromMappedData (ObjectMapper mapper, String header, String json) {
+		return new JsonWebToken (mapper, new byte [][] {
+			header.getBytes (StandardCharsets.UTF_8), {}, {}, json.getBytes (StandardCharsets.UTF_8), {}
+		});
+	}
+
+	public static JsonWebToken fromData (Object data) {
+		return fromMappedData (DEFAULT_MAPPER, data);
+	}
+
+	public static JsonWebToken fromData (Object header, Object data) {
+		return fromMappedData (DEFAULT_MAPPER, header, data);
+	}
+
+	public static JsonWebToken fromMappedData (ObjectMapper mapper, Object data) {
+		try { return fromData (mapper.writeValueAsString (data)); }
+		catch ( Exception e ) { throw Exceptions.wrap (e); }
+	}
+
+	public static JsonWebToken fromMappedData (ObjectMapper mapper, Object header, Object data) {
+		try { return fromData (mapper.writeValueAsString (header), mapper.writeValueAsString (data)); }
+		catch ( Exception e ) { throw Exceptions.wrap (e); }
+	}
+
 	public static JsonWebToken fromString (String token) {
 		return fromMappedString (DEFAULT_MAPPER, token);
 	}
@@ -55,42 +91,6 @@ public class JsonWebToken {
 		return new JsonWebToken (mapper, data);
 	}
 
-	public static JsonWebToken fromData (Object header, Object data) {
-		return fromMappedData (DEFAULT_MAPPER, header, data);
-	}
-
-	public static JsonWebToken fromMappedData (ObjectMapper mapper, Object header, Object data) {
-		try { return fromData (mapper.writeValueAsString (header), mapper.writeValueAsString (data)); }
-		catch ( Exception e ) { throw Exceptions.wrap (e); }
-	}
-
-	public static JsonWebToken fromData (Object data) {
-		return fromMappedData (DEFAULT_MAPPER, data);
-	}
-
-	public static JsonWebToken fromMappedData (ObjectMapper mapper, Object data) {
-		try { return fromData (mapper.writeValueAsString (data)); }
-		catch ( Exception e ) { throw Exceptions.wrap (e); }
-	}
-
-	public static JsonWebToken fromData (String json) {
-		return fromData (DEFAULT_HEADER, json);
-	}
-
-	public static JsonWebToken fromMappedData (ObjectMapper mapper, String json) {
-		return fromMappedData (mapper, DEFAULT_HEADER, json);
-	}
-
-	public static JsonWebToken fromData (String header, String json) {
-		return fromMappedData (DEFAULT_MAPPER, header, json);
-	}
-
-	public static JsonWebToken fromMappedData (ObjectMapper mapper, String header, String json) {
-		return new JsonWebToken (mapper, new byte [][] {
-			header.getBytes (StandardCharsets.UTF_8), {}, {}, json.getBytes (StandardCharsets.UTF_8), {}
-		});
-	}
-
 	private static byte [][] createEmptyData () {
 		byte [][] data = new byte [Keys.values ().length][];
 		for ( Keys key : Keys.values () ) {
@@ -108,30 +108,6 @@ public class JsonWebToken {
 		}
 		this.mapper = mapper;
 		this.data = data;
-	}
-
-	public byte [] get (Keys key) {
-		return data[key.ordinal ()];
-	}
-
-	public String getEncoded (Keys key) {
-		return encoder.encodeToString (get (key));
-	}
-
-	public <T> T get (Keys key, Class<T> clazz) {
-		if ( String.class.equals (clazz) ) { return (T) new String (get (key), StandardCharsets.UTF_8); }
-		try { return mapper.readValue (get (key), clazz); }
-		catch ( Exception e ) { throw Exceptions.wrap (e); }
-	}
-
-	public <T> T get (Keys key, TypeReference<T> type) {
-		try { return mapper.readValue (get (key), type); }
-		catch ( Exception e ) { throw Exceptions.wrap (e); }
-	}
-
-	public boolean has (Keys key) {
-		byte [] part = data[key.ordinal ()];
-		return part != null && part.length != 0;
 	}
 
 	public JsonWebToken with (Keys key, Object data) {
@@ -156,6 +132,30 @@ public class JsonWebToken {
 
 	public JsonWebToken withMapper (ObjectMapper mapper) {
 		return new JsonWebToken (mapper, data);
+	}
+
+	public boolean has (Keys key) {
+		byte [] part = data[key.ordinal ()];
+		return part != null && part.length != 0;
+	}
+
+	public byte [] get (Keys key) {
+		return data[key.ordinal ()];
+	}
+
+	public String getEncoded (Keys key) {
+		return encoder.encodeToString (get (key));
+	}
+
+	public <T> T get (Keys key, Class<T> clazz) {
+		if ( String.class.equals (clazz) ) { return (T) new String (get (key), StandardCharsets.UTF_8); }
+		try { return mapper.readValue (get (key), clazz); }
+		catch ( Exception e ) { throw Exceptions.wrap (e); }
+	}
+
+	public <T> T get (Keys key, TypeReference<T> type) {
+		try { return mapper.readValue (get (key), type); }
+		catch ( Exception e ) { throw Exceptions.wrap (e); }
 	}
 
 	public String getPayload () {
