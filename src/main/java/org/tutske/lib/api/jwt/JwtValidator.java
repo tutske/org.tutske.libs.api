@@ -103,7 +103,7 @@ public class JwtValidator {
 
 		if ( token == null ) { return; }
 
-		String authorization = token.get (JsonWebToken.Keys.Authentication, String.class);
+		String authorization = token.getAs (JsonWebToken.Keys.Authentication, String.class);
 		if ( ! config.validate.apply (token, authorization) ) throw new InvalidJwtException (
 			"Token is not issued by a trusted source, validation does not match",
 			objectNode ("token", token, "authorization", authorization)
@@ -153,7 +153,7 @@ public class JwtValidator {
 	}
 
 	private Timed getTimes (JsonWebToken token) {
-		return token.getPayload (Timed.class);
+		return token.payloadAs (Timed.class);
 	}
 
 	public static class Timed {

@@ -1,8 +1,8 @@
 package org.tutske.lib.api.jwt;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.tutske.lib.json.Mappers;
 import org.tutske.lib.utils.Exceptions;
 
@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.function.Function;
 
 
 public class JsonWebToken {
@@ -126,13 +125,18 @@ public class JsonWebToken {
 		this.data = data;
 	}
 
-	public JsonWebToken with (Keys key, Object data) {
-		try { return with (key, mapper.writeValueAsBytes (data)); }
+	public JsonWebToken withEncoded (Keys key, String data) {
+		return with (key, decoder.decode (data));
+	}
+
+	public JsonWebToken withJson (Keys key, String data) {
+		try { return with (key, mapper.readTree (data)); }
 		catch ( IOException e ) { throw Exceptions.wrap (e); }
 	}
 
-	public JsonWebToken with (Keys key, String data) {
-		return with (key, data.getBytes (StandardCharsets.UTF_8));
+	public JsonWebToken with (Keys key, Object data) {
+		try { return with (key, mapper.writeValueAsBytes (data)); }
+		catch ( IOException e ) { throw Exceptions.wrap (e); }
 	}
 
 	public JsonWebToken with (Keys key, byte [] field) {
@@ -163,37 +167,48 @@ public class JsonWebToken {
 		return encoder.encodeToString (get (key));
 	}
 
-	public <T> T get (Keys key, Class<T> clazz) {
+	public <T extends JsonNode> T getJson (Keys key) {
+		try { return (T) mapper.readTree (get (key)); }
+		catch ( Exception e ) { throw Exceptions.wrap (e); }
+	}
+
+	public <T> T getAs (Keys key, Class<T> clazz) {
 		if ( String.class.equals (clazz) ) { return (T) new String (get (key), StandardCharsets.UTF_8); }
 		try { return mapper.readValue (get (key), clazz); }
 		catch ( Exception e ) { throw Exceptions.wrap (e); }
 	}
 
-	public <T> T get (Keys key, TypeReference<T> type) {
+	public <T> T getAs (Keys key, TypeReference<T> type) {
 		try { return mapper.readValue (get (key), type); }
 		catch ( Exception e ) { throw Exceptions.wrap (e); }
 	}
 
-	public String getPayload () {
-		return new String (get (Keys.Payload), StandardCharsets.UTF_8);
+	public <T extends JsonNode> T payload () {
+		return getJson (Keys.Payload);
 	}
 
-	public <T> T getPayload (Function<String, T> fn) {
-		return fn.apply (getPayload ());
-	}
-
-	public <T> T getPayload (Class<T> clazz) {
-		try { return mapper.readValue (getPayload (), clazz); }
+	public <T> T payloadAs (Class<T> clazz) {
+		try { return mapper.readValue (get (Keys.Payload), clazz); }
 		catch ( Exception e ) { throw Exceptions.wrap (e); }
 	}
 
-	public ObjectNode getJsonPayload () {
-		try { return (ObjectNode) mapper.readTree (get (Keys.Payload)); }
-		catch ( IOException e ) { throw Exceptions.wrap (e); }
+	public <T> T payloadAs (TypeReference<T> type) {
+		try { return mapper.readValue (get (Keys.Payload), type); }
+		catch ( Exception e ) { throw Exceptions.wrap (e); }
 	}
 
-	public <T> T getJsonPayload (Function<ObjectNode, T> fn) {
-		return fn.apply (getJsonPayload ());
+	public <T extends JsonNode> T headers () {
+		return getJson (Keys.Headers);
+	}
+
+	public <T> T headersAs (Class<T> clazz) {
+		try { return mapper.readValue (get (Keys.Headers), clazz); }
+		catch ( Exception e ) { throw Exceptions.wrap (e); }
+	}
+
+	public <T> T headersAs (TypeReference<T> type) {
+		try { return mapper.readValue (get (Keys.Headers), type); }
+		catch ( Exception e ) { throw Exceptions.wrap (e); }
 	}
 
 	@Override
