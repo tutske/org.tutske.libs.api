@@ -49,7 +49,7 @@ public class APIChainTest {
 	}
 
 	@Test
-	public void it_should_give_a_handler_when_no_filters_ar_present () {
+	public void it_should_give_a_handler_when_no_filters_are_present () {
 		RiskyFn<String, String> handler = mock (RiskyFn.class);
 
 		ApiRouter<String, String> router = API.configure (api -> {
@@ -86,6 +86,45 @@ public class APIChainTest {
 		chain.apply ("john");
 
 		verify (notify, times (0)).accept ("john");
+	}
+
+	@Test
+	public void it_should_not_call_filters_that_dont_match_the_method () {
+		ApiRouter<String, String> router = API.configure (api -> {
+			api.route ("/users", EnumSet.of (Request.Method.GET), name -> name);
+			api.filter ("/users/::path", EnumSet.of (Request.Method.POST), filter (notify));
+		});
+
+		Function<String, String> chain = router.createChain (Request.Method.GET, "current", "/users", API.splitParts ("/users"));
+		chain.apply ("john");
+
+		verify (notify, times (0)).accept (any ());
+	}
+
+	@Test
+	public void it_should_not_call_filters_that_dont_match_the_version () {
+		ApiRouter<String, String> router = API.configure (api -> {
+			api.route ("/users", EnumSet.of (Request.Method.GET), name -> name);
+			api.version ("old").filter ("/users/::path", filter (notify));
+		});
+
+		Function<String, String> chain = router.createChain (Request.Method.GET, "current", "/users", API.splitParts ("/users"));
+		chain.apply ("john");
+
+		verify (notify, times (0)).accept (any ());
+	}
+
+	@Test
+	public void it_should_call_filters_that_match_the_version () {
+		ApiRouter<String, String> router = API.configure (api -> {
+			api.route ("/users", EnumSet.of (Request.Method.GET), name -> name);
+			api.version ("current").filter ("/users/::path", filter (notify));
+		});
+
+		Function<String, String> chain = router.createChain (Request.Method.GET, "current", "/users", API.splitParts ("/users"));
+		chain.apply ("john");
+
+		verify (notify, times (1)).accept (any ());
 	}
 
 	@Test
