@@ -1,12 +1,9 @@
 package org.tutske.lib.api.jwt;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.tutske.lib.json.Mappers;
 import org.tutske.lib.utils.Exceptions;
 
 import java.io.IOException;
@@ -18,12 +15,7 @@ import java.util.function.Function;
 
 public class JsonWebToken {
 
-	private static ObjectMapper DEFAULT_MAPPER = new ObjectMapper ()
-		.registerModule (new Jdk8Module ())
-		.registerModule (new JavaTimeModule ())
-		.disable (DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-		.disable (SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-		;
+	private static ObjectMapper DEFAULT_MAPPER = Mappers.mapper ();
 
 	public static enum Keys {
 		Headers, EncryptedKey, Iv, Payload, Authentication
