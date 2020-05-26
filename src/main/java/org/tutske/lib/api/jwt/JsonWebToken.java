@@ -7,7 +7,7 @@ import org.tutske.lib.json.Mappers;
 import org.tutske.lib.utils.Exceptions;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.function.Function;
@@ -23,7 +23,6 @@ public class JsonWebToken {
 
 	public static final String DEFAULT_HEADER = "{\"alg\":\"HS256\",\"typ\":\"JWT\"}";
 	private static final JsonWebToken EMPTY_WEB_TOKEN = new JsonWebToken (DEFAULT_MAPPER, createEmptyData ());
-	private static final Charset utf8 = Charset.forName ("utf-8");
 
 	private static final Base64.Decoder decoder = Base64.getUrlDecoder ();
 	private static final Base64.Encoder encoder = Base64.getUrlEncoder ();
@@ -88,7 +87,7 @@ public class JsonWebToken {
 
 	public static JsonWebToken fromMappedData (ObjectMapper mapper, String header, String json) {
 		return new JsonWebToken (mapper, new byte [][] {
-			header.getBytes (utf8), {}, {}, json.getBytes (utf8), {}
+			header.getBytes (StandardCharsets.UTF_8), {}, {}, json.getBytes (StandardCharsets.UTF_8), {}
 		});
 	}
 
@@ -120,7 +119,7 @@ public class JsonWebToken {
 	}
 
 	public <T> T get (Keys key, Class<T> clazz) {
-		if ( String.class.equals (clazz) ) { return (T) new String (get (key)); }
+		if ( String.class.equals (clazz) ) { return (T) new String (get (key), StandardCharsets.UTF_8); }
 		try { return mapper.readValue (get (key), clazz); }
 		catch ( Exception e ) { throw Exceptions.wrap (e); }
 	}
@@ -141,7 +140,7 @@ public class JsonWebToken {
 	}
 
 	public JsonWebToken with (Keys key, String data) {
-		return with (key, data.getBytes (utf8));
+		return with (key, data.getBytes (StandardCharsets.UTF_8));
 	}
 
 	public JsonWebToken with (Keys key, byte [] field) {
@@ -160,7 +159,7 @@ public class JsonWebToken {
 	}
 
 	public String getPayload () {
-		return new String (get (Keys.Payload), Charset.forName ("UTF-8"));
+		return new String (get (Keys.Payload), StandardCharsets.UTF_8);
 	}
 
 	public <T> T getPayload (Function<String, T> fn) {

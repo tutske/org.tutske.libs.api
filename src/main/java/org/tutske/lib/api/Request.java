@@ -39,7 +39,7 @@ public interface Request {
 	}
 
 	public static String decodeQueryString (String encoded) {
-		try { return URLDecoder.decode (encoded, "UTF-8"); }
+		try { return URLDecoder.decode (encoded, StandardCharsets.UTF_8); }
 		catch ( Exception e ) { throw Exceptions.wrap (e); }
 	}
 
