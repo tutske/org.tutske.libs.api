@@ -51,8 +51,8 @@ public interface Request {
 		}
 	}
 
-	public Method getMethod ();
-	public String getUri ();
+	public Method method ();
+	public String uri ();
 
 	public Bag<String, String> pathParams ();
 	public Bag<String, String> queryParams ();
@@ -71,7 +71,7 @@ public interface Request {
 	}
 
 	default public byte [] bytes () {
-		try ( InputStream in = getInputStream () ) {
+		try ( InputStream in = inputstream () ) {
 			return in.readAllBytes ();
 		} catch ( IOException e ) {
 			throw new RuntimeException (e);
@@ -83,11 +83,11 @@ public interface Request {
 		return json (JsonNode.class);
 	}
 
-	default public InputStream getInputStream () throws IOException {
+	default public InputStream inputstream () throws IOException {
 		return new ByteArrayInputStream (bytes ());
 	}
 
-	public OutputStream getOutputStream () throws IOException;
+	public OutputStream outputstream () throws IOException;
 
 	public <T> T extractWrapped (Class<T> clazz);
 
