@@ -5,7 +5,6 @@ import org.tutske.lib.utils.Bag;
 import org.tutske.lib.utils.Exceptions;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -63,22 +62,17 @@ public interface Request {
 	public void setHeader (String header, String value);
 	public void setStatus (int status);
 
-	default public String getBody () {
-		return getBody (StandardCharsets.UTF_8);
+	default public String body () {
+		return body (StandardCharsets.UTF_8);
 	}
 
-	default public String getBody (Charset charset) {
-		try {
-			ByteArrayOutputStream out = new ByteArrayOutputStream ();
-			InputStream in = getInputStream ();
+	default public String body (Charset charset) {
+		return new String (bytes (), charset);
+	}
 
-			int index = 0;
-			byte [] buffer = new byte [1 << 14];
-			while ( (index = in.read (buffer, 0, buffer.length)) != -1 ) {
-				out.write (buffer, 0, index);
-			}
-
-			return new String (out.toByteArray (), charset);
+	default public byte [] bytes () {
+		try ( InputStream in = getInputStream () ) {
+			return in.readAllBytes ();
 		} catch ( IOException e ) {
 			throw new RuntimeException (e);
 		}
@@ -90,7 +84,7 @@ public interface Request {
 	}
 
 	default public InputStream getInputStream () throws IOException {
-		return new ByteArrayInputStream (getBody ().getBytes ());
+		return new ByteArrayInputStream (bytes ());
 	}
 
 	public OutputStream getOutputStream () throws IOException;
