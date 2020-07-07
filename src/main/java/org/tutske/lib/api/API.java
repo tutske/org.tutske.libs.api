@@ -1,7 +1,6 @@
 package org.tutske.lib.api;
 
 import org.tutske.lib.utils.Functions.*;
-import org.tutske.lib.api.Request.Method;
 import org.tutske.lib.utils.Bag;
 import org.tutske.lib.utils.Exceptions;
 

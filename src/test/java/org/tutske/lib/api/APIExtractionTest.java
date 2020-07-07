@@ -2,6 +2,7 @@ package org.tutske.lib.api;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.tutske.lib.api.Method.*;
 
 import org.junit.Test;
 import org.tutske.lib.utils.Bag;
@@ -84,7 +85,7 @@ public class APIExtractionTest {
 	public void it_should_extract_parameters_with_the_sub_routes () {
 		ApiRouter<String, String> router = API.configure (api -> {
 			api.group ("/root", group -> {
-				group.route ("route", "/:name", EnumSet.of (Request.Method.POST), name -> name);
+				group.route ("route", "/:name", EnumSet.of (POST), name -> name);
 			});
 		});
 
@@ -96,7 +97,7 @@ public class APIExtractionTest {
 	public void it_should_extract_parameters_from_the_group () {
 		ApiRouter<String, String> router = API.configure (api -> {
 			api.group ("/users/:name", group -> {
-				group.route ("route", "/ping", EnumSet.of (Request.Method.POST), name -> name);
+				group.route ("route", "/ping", EnumSet.of (POST), name -> name);
 			});
 		});
 
@@ -109,7 +110,7 @@ public class APIExtractionTest {
 	public void it_should_extract_parameters_from_both_the_group_and_the_sub () {
 		ApiRouter<String, String> router = API.configure (api -> {
 			api.group ("/users/:name", group -> {
-				group.route ("route", "/:game", EnumSet.of (Request.Method.POST), name -> name);
+				group.route ("route", "/:game", EnumSet.of (POST), name -> name);
 			});
 		});
 
@@ -123,7 +124,7 @@ public class APIExtractionTest {
 	public void it_should_extract_from_subs_with_a_group_at_the_base () {
 		ApiRouter<String, String> router = API.configure (api -> {
 			api.group ("/", group -> {
-				group.route ("route", "/sub/:key", EnumSet.of (Request.Method.POST), name -> name);
+				group.route ("route", "/sub/:key", EnumSet.of (POST), name -> name);
 			});
 		});
 
@@ -137,7 +138,7 @@ public class APIExtractionTest {
 	public void it_should_not_find_any_parameters_when_the_id_is_null () {
 		ApiRouter<String, String> router = API.configure (api -> {
 			api.group ("/users/:name", group -> {
-				group.route ("route", "/:game", EnumSet.of (Request.Method.POST), name -> name);
+				group.route ("route", "/:game", EnumSet.of (POST), name -> name);
 			});
 		});
 		assertThat (router.extractMatches (null, "/sub/value", API.splitParts ("/sub/value")), nullValue ());
@@ -147,7 +148,7 @@ public class APIExtractionTest {
 	public void it_should_not_create_a_ling_when_the_id_is_null () {
 		ApiRouter<String, String> router = API.configure (api -> {
 			api.group ("/users/:name", group -> {
-				group.route ("route", "/:game", EnumSet.of (Request.Method.POST), name -> name);
+				group.route ("route", "/:game", EnumSet.of (POST), name -> name);
 			});
 		});
 		assertThat (router.linkTo (null, Collections.emptyMap ()), nullValue ());
@@ -157,7 +158,7 @@ public class APIExtractionTest {
 	public void it_should_not_find_a_handler_when_the_id_is_null () {
 		ApiRouter<String, String> router = API.configure (api -> {
 			api.group ("/users/:name", group -> {
-				group.route ("route", "/:game", EnumSet.of (Request.Method.POST), name -> name);
+				group.route ("route", "/:game", EnumSet.of (POST), name -> name);
 			});
 		});
 		assertThat (router.getHandler (null), nullValue ());

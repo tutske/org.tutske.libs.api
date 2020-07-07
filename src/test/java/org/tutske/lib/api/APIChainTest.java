@@ -3,6 +3,7 @@ package org.tutske.lib.api;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
+import static org.tutske.lib.api.Method.*;
 import static org.tutske.lib.utils.Functions.*;
 
 import org.junit.Test;
@@ -24,7 +25,7 @@ public class APIChainTest {
 			api.route ("/other", req -> "blocking");
 		});
 
-		Function<String, String> chain = router.createChain (Request.Method.GET, "current", "/other/path", API.splitParts ("/other/path"));
+		Function<String, String> chain = router.createChain (GET, "current", "/other/path", API.splitParts ("/other/path"));
 		assertThat (chain.apply ("John"), is ("all"));
 	}
 
@@ -35,7 +36,7 @@ public class APIChainTest {
 			api.route ("/other", req -> "blocking");
 		});
 
-		Function<String, String> chain = router.createChain (Request.Method.GET, "current", "/other", API.splitParts ("/other"));
+		Function<String, String> chain = router.createChain (GET, "current", "/other", API.splitParts ("/other"));
 		assertThat (chain.apply ("John"), is ("blocking"));
 	}
 
@@ -44,7 +45,7 @@ public class APIChainTest {
 		ApiRouter<String, String> router = API.configure (api -> {
 		});
 
-		Function<String, String> chain = router.createChain (Request.Method.GET, "current", "/users", API.splitParts ("/users"));
+		Function<String, String> chain = router.createChain (GET, "current", "/users", API.splitParts ("/users"));
 		assertThat (chain, nullValue ());
 	}
 
@@ -56,7 +57,7 @@ public class APIChainTest {
 			api.route ("/users", handler);
 		});
 
-		Function<String, String> chain = router.createChain (Request.Method.GET, "current", "/users", API.splitParts ("/users"));
+		Function<String, String> chain = router.createChain (GET, "current", "/users", API.splitParts ("/users"));
 		chain.apply ("john");
 
 		verify (handler).apply ("john");
@@ -65,11 +66,11 @@ public class APIChainTest {
 	@Test
 	public void it_should_call_registered_filters_that_match () {
 		ApiRouter<String, String> router = API.configure (api -> {
-			api.route ("/users", EnumSet.of (Request.Method.POST), name -> name);
+			api.route ("/users", EnumSet.of (POST), name -> name);
 			api.filter ("/::path", filter (notify));
 		});
 
-		Function<String, String> chain = router.createChain (Request.Method.POST, "current", "/users", API.splitParts ("/users"));
+		Function<String, String> chain = router.createChain (POST, "current", "/users", API.splitParts ("/users"));
 		chain.apply ("john");
 
 		verify (notify).accept ("john");
@@ -78,11 +79,11 @@ public class APIChainTest {
 	@Test
 	public void it_should_not_call_filters_that_dont_match () {
 		ApiRouter<String, String> router = API.configure (api -> {
-			api.route ("/users", EnumSet.of (Request.Method.POST), name -> name);
+			api.route ("/users", EnumSet.of (POST), name -> name);
 			api.filter ("/api/::path", filter (notify));
 		});
 
-		Function<String, String> chain = router.createChain (Request.Method.POST, "current", "/users", API.splitParts ("/users"));
+		Function<String, String> chain = router.createChain (POST, "current", "/users", API.splitParts ("/users"));
 		chain.apply ("john");
 
 		verify (notify, times (0)).accept ("john");
@@ -91,11 +92,11 @@ public class APIChainTest {
 	@Test
 	public void it_should_not_call_filters_that_dont_match_the_method () {
 		ApiRouter<String, String> router = API.configure (api -> {
-			api.route ("/users", EnumSet.of (Request.Method.GET), name -> name);
-			api.filter ("/users/::path", EnumSet.of (Request.Method.POST), filter (notify));
+			api.route ("/users", EnumSet.of (GET), name -> name);
+			api.filter ("/users/::path", EnumSet.of (POST), filter (notify));
 		});
 
-		Function<String, String> chain = router.createChain (Request.Method.GET, "current", "/users", API.splitParts ("/users"));
+		Function<String, String> chain = router.createChain (GET, "current", "/users", API.splitParts ("/users"));
 		chain.apply ("john");
 
 		verify (notify, times (0)).accept (any ());
@@ -104,11 +105,11 @@ public class APIChainTest {
 	@Test
 	public void it_should_not_call_filters_that_dont_match_the_version () {
 		ApiRouter<String, String> router = API.configure (api -> {
-			api.route ("/users", EnumSet.of (Request.Method.GET), name -> name);
+			api.route ("/users", EnumSet.of (GET), name -> name);
 			api.version ("old").filter ("/users/::path", filter (notify));
 		});
 
-		Function<String, String> chain = router.createChain (Request.Method.GET, "current", "/users", API.splitParts ("/users"));
+		Function<String, String> chain = router.createChain (GET, "current", "/users", API.splitParts ("/users"));
 		chain.apply ("john");
 
 		verify (notify, times (0)).accept (any ());
@@ -117,11 +118,11 @@ public class APIChainTest {
 	@Test
 	public void it_should_call_filters_that_match_the_version () {
 		ApiRouter<String, String> router = API.configure (api -> {
-			api.route ("/users", EnumSet.of (Request.Method.GET), name -> name);
+			api.route ("/users", EnumSet.of (GET), name -> name);
 			api.version ("current").filter ("/users/::path", filter (notify));
 		});
 
-		Function<String, String> chain = router.createChain (Request.Method.GET, "current", "/users", API.splitParts ("/users"));
+		Function<String, String> chain = router.createChain (GET, "current", "/users", API.splitParts ("/users"));
 		chain.apply ("john");
 
 		verify (notify, times (1)).accept (any ());
@@ -132,11 +133,11 @@ public class APIChainTest {
 		ApiRouter<String, String> router = API.configure (base -> {
 			base.group ("/api", api -> {
 				api.filter ("/::path", filter (notify));
-				api.route ("/users", EnumSet.of (Request.Method.POST), name -> name);
+				api.route ("/users", EnumSet.of (POST), name -> name);
 			});
 		});
 
-		Function<String, String> chain = router.createChain (Request.Method.POST, "current", "/api/users", API.splitParts ("/api/users"));
+		Function<String, String> chain = router.createChain (POST, "current", "/api/users", API.splitParts ("/api/users"));
 		chain.apply ("john");
 
 		verify (notify).accept ("john");
@@ -149,11 +150,11 @@ public class APIChainTest {
 				api.filter ("/::path", filter (notify));
 			});
 			base.group ("/admin", admin -> {
-				admin.route ("/users", EnumSet.of (Request.Method.POST), name -> name);
+				admin.route ("/users", EnumSet.of (POST), name -> name);
 			});
 		});
 
-		Function<String, String> chain = router.createChain (Request.Method.POST, "current", "/admin/users", API.splitParts ("/admin/users"));
+		Function<String, String> chain = router.createChain (POST, "current", "/admin/users", API.splitParts ("/admin/users"));
 		chain.apply ("john");
 
 		verify (notify, times (0)).accept ("john");
@@ -166,7 +167,7 @@ public class APIChainTest {
 			api.route ("/", name -> name);
 		});
 
-		Function<String, String> chain = router.createChain (Request.Method.GET, "current", "/", API.splitParts ("/"));
+		Function<String, String> chain = router.createChain (GET, "current", "/", API.splitParts ("/"));
 		chain.apply ("john");
 
 		verify (notify).accept ("john");
@@ -187,7 +188,7 @@ public class APIChainTest {
 		});
 
 		InOrder ordered = inOrder (notify);
-		Function<String, String> chain = router.createChain (Request.Method.GET, "current", "/api/users", API.splitParts ("/api/users"));
+		Function<String, String> chain = router.createChain (GET, "current", "/api/users", API.splitParts ("/api/users"));
 		chain.apply ("john");
 
 		ordered.verify (notify).accept ("first");
@@ -203,7 +204,7 @@ public class APIChainTest {
 			api.route ("/api/users", name -> name);
 		});
 
-		Function<String, String> chain = router.createChain (Request.Method.GET, "current", "/api/users", API.splitParts ("/api/users"));
+		Function<String, String> chain = router.createChain (GET, "current", "/api/users", API.splitParts ("/api/users"));
 		chain.apply ("john");
 
 		verify (notify, times (0)).accept ("john");

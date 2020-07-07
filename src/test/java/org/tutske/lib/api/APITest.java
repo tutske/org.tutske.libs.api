@@ -5,7 +5,7 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.tutske.lib.utils.Functions.*;
-import static org.tutske.lib.api.Request.Method.*;
+import static org.tutske.lib.api.Method.*;
 
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
