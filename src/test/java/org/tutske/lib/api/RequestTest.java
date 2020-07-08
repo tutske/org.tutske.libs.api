@@ -74,7 +74,6 @@ public class RequestTest {
 		@Override public void setStatus (int status) { }
 		@Override public <T> T json (Class<T> clazz) { return null; }
 		@Override public OutputStream outputstream () { return null; }
-		@Override public <T> T extractWrapped (Class<T> clazz) { return null; }
 
 		@Override public CompletableFuture<Void> reply (int status, Map<String, Object> headers, Object payload) {
 			return CompletableFuture.completedFuture (null);

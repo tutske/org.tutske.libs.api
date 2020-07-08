@@ -30,7 +30,11 @@ public interface Client extends AutoCloseable {
 		return request (method, path).with (params);
 	}
 
-	public <T> T extractWrapped (Class<T> clazz);
+	default public <T> T extractWrapped (Class<T> clazz) {
+		throw new JsonException ("Class not supported for extraction",
+			Json.objectNode ("class", clazz.getCanonicalName ())
+		);
+	}
 
 	public interface Parameter {
 	}
@@ -117,7 +121,11 @@ public interface Client extends AutoCloseable {
 			return send (payload).thenCompose (fn);
 		}
 
-		public <T> T extractWrapped (Class<T> clazz);
+		default public <T> T extractWrapped (Class<T> clazz) {
+			throw new JsonException ("Class not supported for extraction",
+				Json.objectNode ("class", clazz.getCanonicalName ())
+			);
+		}
 	}
 
 	public static interface Response {
@@ -151,7 +159,11 @@ public interface Client extends AutoCloseable {
 			return new ByteArrayInputStream (bytes ());
 		}
 
-		public <T> T extractWrapped (Class<T> clazz);
+		default public <T> T extractWrapped (Class<T> clazz) {
+			throw new JsonException ("Class not supported for extraction",
+				Json.objectNode ("class", clazz.getCanonicalName ())
+			);
+		}
 	}
 
 }

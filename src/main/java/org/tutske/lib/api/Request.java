@@ -1,6 +1,8 @@
 package org.tutske.lib.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.tutske.lib.json.Json;
+import org.tutske.lib.json.JsonException;
 import org.tutske.lib.utils.Bag;
 import org.tutske.lib.utils.Exceptions;
 
@@ -84,7 +86,11 @@ public interface Request {
 
 	public OutputStream outputstream () throws IOException;
 
-	public <T> T extractWrapped (Class<T> clazz);
+	default public <T> T extractWrapped (Class<T> clazz) {
+		throw new JsonException ("Class not supported for extraction",
+			Json.objectNode ("class", clazz.getCanonicalName ())
+		);
+	}
 
 	CompletableFuture<Void> reply (int status, Map<String, Object> headers, Object payload);
 	default CompletableFuture<Void> reply (int status, Object payload) {
