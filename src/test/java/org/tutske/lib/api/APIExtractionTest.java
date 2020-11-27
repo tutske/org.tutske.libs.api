@@ -67,8 +67,7 @@ public class APIExtractionTest {
 	}
 
 	@Test
-	public void it_should_extract_traling_path_in_the_parmas_when_after_multiple_other_parts () {
-
+	public void it_should_extract_trailing_path_in_the_params_when_after_multiple_other_parts () {
 		ApiRouter<String, String> router = API.configure (api -> {
 			api.route ("route", "/api/files/::path", name -> name);
 		});
