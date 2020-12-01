@@ -92,11 +92,11 @@ public interface Request {
 		);
 	}
 
-	CompletableFuture<Void> reply (int status, Map<String, Object> headers, Object payload);
+	CompletableFuture<Void> reply (int status, Map<String, ?> headers, Object payload);
 	default CompletableFuture<Void> reply (int status, Object payload) {
 		return reply (status, Collections.emptyMap (), payload);
 	}
-	default CompletableFuture<Void> reply (Map<String, Object> headers, Object payload) {
+	default CompletableFuture<Void> reply (Map<String, ?> headers, Object payload) {
 		return reply (200, headers, payload);
 	}
 	default CompletableFuture<Void> reply (Object payload) {

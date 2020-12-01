@@ -10,8 +10,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 
 public class RequestTest {
@@ -47,6 +49,30 @@ public class RequestTest {
 		assertThat (request.body (), is ("The Body Content"));
 	}
 
+	@Test
+	public void it_should_reply_with_headers_that_have_string_values ()
+	throws ExecutionException, InterruptedException {
+		Request request = bytesRequest ("body".getBytes ());
+
+		Map<String, String> headers = new HashMap<> ();
+		headers.put ("key", "value");
+		CompletableFuture<Void> future = request.reply (headers, new Object ());
+
+		future.get ();
+	}
+
+	@Test
+	public void it_should_reply_with_headers_that_have_object_values ()
+	throws ExecutionException, InterruptedException {
+		Request request = bytesRequest ("body".getBytes ());
+
+		Map<String, Object> headers = new HashMap<> ();
+		headers.put ("key", new Object ());
+		CompletableFuture<Void> future = request.reply (headers, new Object ());
+
+		future.get ();
+	}
+
 	public static Request bytesRequest (byte [] body) {
 		return new EmptyRequest () {
 			@Override public byte [] bytes () {
@@ -75,7 +101,7 @@ public class RequestTest {
 		@Override public <T> T json (Class<T> clazz) { return null; }
 		@Override public OutputStream outputstream () { return null; }
 
-		@Override public CompletableFuture<Void> reply (int status, Map<String, Object> headers, Object payload) {
+		@Override public CompletableFuture<Void> reply (int status, Map<String, ?> headers, Object payload) {
 			return CompletableFuture.completedFuture (null);
 		}
 	}
