@@ -5,10 +5,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class NotFoundException extends ResponseException {
 
+	public static int STATUS_CODE = 404;
+
 	{
 		type = "/not_found";
 		title = "Not Found";
-		status = 404;
+		status = STATUS_CODE;
 	}
 
 	public NotFoundException () { this ("Could not find requested resource"); }

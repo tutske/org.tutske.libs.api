@@ -7,10 +7,12 @@ import org.tutske.lib.json.Json;
 
 public class InvalidJwtException extends ResponseException {
 
+	public static int STATUS_CODE = AuthenticationFailure.STATUS_CODE;
+
 	{
 		type = "/invalid_jwt";
 		title = "The provided jwt could not be validated";
-		status = 403;
+		status = STATUS_CODE;
 	}
 
 	public InvalidJwtException () { super ("Invalid jwt."); }

@@ -5,10 +5,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class AuthorizationFailure extends ResponseException {
 
+	public static int STATUS_CODE = 401;
+
 	{
 		type = "/authorization_failure";
 		title = "You are not authorizated to access the url";
-		status = 403;
+		status = STATUS_CODE;
 	}
 
 
