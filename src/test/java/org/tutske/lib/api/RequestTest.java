@@ -104,6 +104,9 @@ public class RequestTest {
 		@Override public CompletableFuture<Void> reply (int status, Map<String, ?> headers, Object payload) {
 			return CompletableFuture.completedFuture (null);
 		}
+		@Override public CompletableFuture<Void> reply (int status, Map<String, ?> headers, InputStream in) {
+			return null;
+		}
 	}
 
 }

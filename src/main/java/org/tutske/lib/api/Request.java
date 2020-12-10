@@ -103,4 +103,30 @@ public interface Request {
 		return reply (200, Collections.emptyMap (), payload);
 	}
 
+	CompletableFuture<Void> reply (int status, Map<String, ?> headers, InputStream in);
+	default CompletableFuture<Void> reply (int status, InputStream in) {
+		return reply (status, Collections.emptyMap (), in);
+	}
+	default CompletableFuture<Void> reply (Map<String, ?> headers, InputStream in) {
+		return reply (200, headers, in);
+	}
+	default CompletableFuture<Void> reply (InputStream in) {
+		return reply (200, Collections.emptyMap (), in);
+	}
+	default CompletableFuture<Void> reply (int status, Map<String, ?> headers, byte [] payload) {
+		return reply (status, headers, new ByteArrayInputStream (payload));
+	}
+	default CompletableFuture<Void> reply (int status, byte [] payload) {
+		return reply (status, Collections.emptyMap (), new ByteArrayInputStream (payload));
+	}
+	default CompletableFuture<Void> reply (Map<String, ?> headers, byte [] payload) {
+		return reply (200, headers, new ByteArrayInputStream (payload));
+	}
+	default CompletableFuture<Void> reply (byte [] payload) {
+		return reply (200, Collections.emptyMap (), new ByteArrayInputStream (payload));
+	}
+	default CompletableFuture<Void> reply (int status) {
+		return reply (status, Collections.emptyMap (), new byte [] {});
+	}
+
 }
