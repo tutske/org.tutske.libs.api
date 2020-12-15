@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -20,6 +21,9 @@ import java.util.stream.Collectors;
 
 
 public class API<REQ, RES> {
+
+	public static interface Producer<T extends Request> extends RiskyConsumer<API<T, CompletableFuture<Void>>> {
+	}
 
 	/* -- static methods -- */
 
