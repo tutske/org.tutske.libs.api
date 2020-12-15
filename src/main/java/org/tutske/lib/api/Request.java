@@ -20,8 +20,8 @@ import java.util.concurrent.CompletableFuture;
 
 public interface Request {
 
-	public static void decodeInto (Bag<String, String> bag, String querystring) {
-		if ( querystring == null || querystring.isEmpty () ) { return; }
+	public static Bag<String, String> decodeInto (Bag<String, String> bag, String querystring) {
+		if ( querystring == null || querystring.isEmpty () ) { return bag; }
 
 		for ( String part : querystring.split ("&") ) {
 			String [] split = part.split ("=", 2);
@@ -34,12 +34,11 @@ public interface Request {
 				bag.add (key);
 			}
 		}
+		return bag;
 	}
 
 	public static Bag<String, String> decode (String querystring) {
-		Bag<String, String> bag = new Bag<> ();
-		decodeInto (bag, querystring);
-		return bag;
+		return decodeInto (new Bag<> (), querystring);
 	}
 
 	public static String decodeQueryString (String encoded) {
