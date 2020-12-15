@@ -7,6 +7,7 @@ import org.tutske.lib.utils.Exceptions;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -52,8 +53,7 @@ public class API<REQ, RES> {
 
 		String [] parts = descriptor.substring (1).split ("/");
 		for ( int i = 0; i < parts.length; i++ ) {
-			try { parts[i] = URLDecoder.decode (parts[i], "UTF-8"); }
-			catch ( UnsupportedEncodingException e ) { throw Exceptions.wrap (e); }
+			parts[i] = URLDecoder.decode (parts[i], StandardCharsets.UTF_8);
 		}
 
 		return parts;
