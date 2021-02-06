@@ -4,6 +4,9 @@ plugins {
 
 group = 'org.tutske.libs'
 
+java.sourceCompatibility = JavaVersion.VERSION_11
+java.targetCompatibility = JavaVersion.VERSION_11
+
 dependencies {
 	api (
 		[ group: 'org.slf4j', name: 'slf4j-api', version: '[1.7,2)' ],
@@ -22,7 +25,10 @@ dependencies {
 
 compileJava {
 	doFirst {
-		options.compilerArgs = [ '--module-path', classpath.asPath ]
+		options.compilerArgs = [
+			'--module-path', classpath.asPath,
+			'--release', '11'
+		]
 		classpath = files ()
 	}
 }
