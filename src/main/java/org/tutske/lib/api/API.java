@@ -1,18 +1,19 @@
 package org.tutske.lib.api;
 
 import org.tutske.lib.utils.Functions.*;
-import org.tutske.lib.api.Request.Method;
 import org.tutske.lib.utils.Bag;
 import org.tutske.lib.utils.Exceptions;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -20,6 +21,9 @@ import java.util.stream.Collectors;
 
 
 public class API<REQ, RES> {
+
+	public static interface Producer<T extends Request> extends RiskyConsumer<API<T, CompletableFuture<Void>>> {
+	}
 
 	/* -- static methods -- */
 
@@ -53,8 +57,7 @@ public class API<REQ, RES> {
 
 		String [] parts = descriptor.substring (1).split ("/");
 		for ( int i = 0; i < parts.length; i++ ) {
-			try { parts[i] = URLDecoder.decode (parts[i], "UTF-8"); }
-			catch ( UnsupportedEncodingException e ) { throw Exceptions.wrap (e); }
+			parts[i] = URLDecoder.decode (parts[i], StandardCharsets.UTF_8);
 		}
 
 		return parts;

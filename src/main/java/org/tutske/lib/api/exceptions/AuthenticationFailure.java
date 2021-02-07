@@ -5,10 +5,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class AuthenticationFailure extends ResponseException {
 
+	public static int STATUS_CODE = 403;
+
 	{
 		type = "/authentication-failure";
 		title = "Authentication Failure";
-		status = 403;
+		status = STATUS_CODE;
 	}
 
 	public AuthenticationFailure () { this ("Invalid credentials."); }

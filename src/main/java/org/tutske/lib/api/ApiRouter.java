@@ -1,7 +1,5 @@
 package org.tutske.lib.api;
 
-import static org.tutske.lib.api.Request.*;
-
 import org.tutske.lib.utils.Bag;
 
 import java.util.List;

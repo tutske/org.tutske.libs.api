@@ -6,10 +6,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class InternalException extends ResponseException {
 
+	public static int STATUS_CODE = ResponseException.STATUS_CODE;
+
 	{
 		type = "/internal-error";
 		title = "The server suffered an internal error.";
-		status = 500;
+		status = STATUS_CODE;
 	}
 
 	public InternalException () { super (); }

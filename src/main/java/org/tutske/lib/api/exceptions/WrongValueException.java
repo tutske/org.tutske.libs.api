@@ -6,10 +6,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class WrongValueException extends ResponseException {
 
+	public static int STATUS_CODE = InputException.STATUS_CODE;
+
 	{
 		type = "/wrong_value";
 		title = "wrong value";
-		status = 417;
+		status = STATUS_CODE;
 	}
 
 	public WrongValueException () { super (); }

@@ -1,8 +1,9 @@
 module org.tutske.libs.api {
 
-	exports org.tutske.lib.api;
+	exports org.tutske.lib.api.data;
 	exports org.tutske.lib.api.exceptions;
 	exports org.tutske.lib.api.jwt;
+	exports org.tutske.lib.api;
 
 	/* explicit modules */
 	requires org.slf4j;

@@ -1,4 +1,14 @@
 pluginManagement.repositories {
-	maven { url ('http://nexus.tutske.org:10080/repository/maven-public/') }
+	maven {
+		def p = { key, otherwise -> this.hasProperty (key) ? this.getProperty (key) : otherwise }
+
+		def location = p ('nexus.plugins.location', 'https://nexus.tutske.org:10443/repository')
+		def repo = p ('nexus.plugins.repo', 'maven-releases')
+		def user = p ('nexus.plugins.username', 'builder')
+		def pass = p ('nexus.plugins.password', '')
+
+		url (p ('nexus.plugins.url', location + '/' + repo))
+		if ( ! pass.isEmpty () ) credentials { username (user); password (pass); }
+	}
 }
 rootProject.name = 'org.tutske.libs.api'

@@ -1,23 +1,27 @@
 package org.tutske.lib.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.tutske.lib.json.Json;
+import org.tutske.lib.json.JsonException;
 import org.tutske.lib.utils.Bag;
 import org.tutske.lib.utils.Exceptions;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 
 public interface Request {
 
-	public static void decodeInto (Bag<String, String> bag, String querystring) {
-		if ( querystring == null || querystring.isEmpty () ) { return; }
+	public static Bag<String, String> decodeInto (Bag<String, String> bag, String querystring) {
+		if ( querystring == null || querystring.isEmpty () ) { return bag; }
 
 		for ( String part : querystring.split ("&") ) {
 			String [] split = part.split ("=", 2);
@@ -30,30 +34,21 @@ public interface Request {
 				bag.add (key);
 			}
 		}
-	}
-
-	public static Bag<String, String> decode (String querystring) {
-		Bag<String, String> bag = new Bag<> ();
-		decodeInto (bag, querystring);
 		return bag;
 	}
 
+	public static Bag<String, String> decode (String querystring) {
+		return decodeInto (new Bag<> (), querystring);
+	}
+
 	public static String decodeQueryString (String encoded) {
-		try { return URLDecoder.decode (encoded, "UTF-8"); }
+		try { return URLDecoder.decode (encoded, StandardCharsets.UTF_8); }
 		catch ( Exception e ) { throw Exceptions.wrap (e); }
 	}
 
 
-	public enum Method {
-		CONNECT, DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT, TRACE, UNKNOWN;
-		public static Method of (String value) {
-			try { return Method.valueOf (value.toUpperCase ()); }
-			catch ( IllegalArgumentException e ) { return UNKNOWN; }
-		}
-	}
-
-	public Method getMethod ();
-	public String getUri ();
+	public Method method ();
+	public String uri ();
 
 	public Bag<String, String> pathParams ();
 	public Bag<String, String> queryParams ();
@@ -63,22 +58,17 @@ public interface Request {
 	public void setHeader (String header, String value);
 	public void setStatus (int status);
 
-	default public String getBody () {
-		return getBody (StandardCharsets.UTF_8);
+	default public String body () {
+		return body (StandardCharsets.UTF_8);
 	}
 
-	default public String getBody (Charset charset) {
-		try {
-			ByteArrayOutputStream out = new ByteArrayOutputStream ();
-			InputStream in = getInputStream ();
+	default public String body (Charset charset) {
+		return new String (bytes (), charset);
+	}
 
-			int index = 0;
-			byte [] buffer = new byte [1 << 14];
-			while ( (index = in.read (buffer, 0, buffer.length)) != -1 ) {
-				out.write (buffer, 0, index);
-			}
-
-			return new String (out.toByteArray (), charset);
+	default public byte [] bytes () {
+		try ( InputStream in = inputstream () ) {
+			return in.readAllBytes ();
 		} catch ( IOException e ) {
 			throw new RuntimeException (e);
 		}
@@ -89,12 +79,53 @@ public interface Request {
 		return json (JsonNode.class);
 	}
 
-	default public InputStream getInputStream () throws IOException {
-		return new ByteArrayInputStream (getBody ().getBytes ());
+	default public InputStream inputstream () throws IOException {
+		return new ByteArrayInputStream (bytes ());
 	}
 
-	public OutputStream getOutputStream () throws IOException;
+	public OutputStream outputstream () throws IOException;
 
-	public <T> T extractWrapped (Class<T> clazz);
+	default public <T> T extractWrapped (Class<T> clazz) {
+		throw new JsonException ("Class not supported for extraction",
+			Json.objectNode ("class", clazz.getCanonicalName ())
+		);
+	}
+
+	CompletableFuture<Void> reply (int status, Map<String, ?> headers, Object payload);
+	default CompletableFuture<Void> reply (int status, Object payload) {
+		return reply (status, Collections.emptyMap (), payload);
+	}
+	default CompletableFuture<Void> reply (Map<String, ?> headers, Object payload) {
+		return reply (200, headers, payload);
+	}
+	default CompletableFuture<Void> reply (Object payload) {
+		return reply (200, Collections.emptyMap (), payload);
+	}
+
+	CompletableFuture<Void> reply (int status, Map<String, ?> headers, InputStream in);
+	default CompletableFuture<Void> reply (int status, InputStream in) {
+		return reply (status, Collections.emptyMap (), in);
+	}
+	default CompletableFuture<Void> reply (Map<String, ?> headers, InputStream in) {
+		return reply (200, headers, in);
+	}
+	default CompletableFuture<Void> reply (InputStream in) {
+		return reply (200, Collections.emptyMap (), in);
+	}
+	default CompletableFuture<Void> reply (int status, Map<String, ?> headers, byte [] payload) {
+		return reply (status, headers, new ByteArrayInputStream (payload));
+	}
+	default CompletableFuture<Void> reply (int status, byte [] payload) {
+		return reply (status, Collections.emptyMap (), new ByteArrayInputStream (payload));
+	}
+	default CompletableFuture<Void> reply (Map<String, ?> headers, byte [] payload) {
+		return reply (200, headers, new ByteArrayInputStream (payload));
+	}
+	default CompletableFuture<Void> reply (byte [] payload) {
+		return reply (200, Collections.emptyMap (), new ByteArrayInputStream (payload));
+	}
+	default CompletableFuture<Void> reply (int status) {
+		return reply (status, Collections.emptyMap (), new byte [] {});
+	}
 
 }

@@ -15,6 +15,7 @@ import java.util.Map;
 
 public class ResponseException extends JsonException {
 
+	public static int STATUS_CODE = 500;
 	private static String BASE_HOST = null;
 	private static String BASE_URL = null;
 
@@ -38,7 +39,7 @@ public class ResponseException extends JsonException {
 	{
 		type = "/internal_server_error";
 		title = "Internal Server Error";
-		status = 500;
+		status = STATUS_CODE;
 	}
 
 	public ResponseException () {}

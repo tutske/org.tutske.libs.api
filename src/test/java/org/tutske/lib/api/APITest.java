@@ -2,12 +2,17 @@ package org.tutske.lib.api;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.tutske.lib.utils.Functions.*;
-import static org.tutske.lib.api.Request.Method.*;
+import static org.tutske.lib.api.Method.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.util.EnumSet;
+import java.util.function.Consumer;
 
 
 public class APITest {
@@ -20,6 +25,20 @@ public class APITest {
 
 		String id = router.toId (GET, "a.1.0", "/users", new String [] { "users" });
 		assertThat (id, is ("v1:users"));
+	}
+
+	@Test
+	public void it_should_configure_apis_on_handlers () {
+		Consumer<ApiRouter<String, String>> handler = mock (Consumer.class);
+		API.configure (handler, api -> {
+			api.version ("a.1.0").route ("v1:users", "/users", name -> name);
+		});
+
+		ArgumentCaptor<ApiRouter> captor = ArgumentCaptor.forClass (ApiRouter.class);
+		verify (handler).accept (captor.capture ());
+		ApiRouter<String, String> router = captor.getValue ();
+
+		assertThat (router.toId (GET, "a.1.0", "/users", new String [] { "users" }), is ("v1:users"));
 	}
 
 	@Test
@@ -47,6 +66,32 @@ public class APITest {
 
 		String id = router.toId (GET, "a.1.0", "/api/users", new String [] { "api", "users" });
 		assertThat (id, is ("a.1.0:users"));
+	}
+
+	@Test
+	public void it_should_configure_the_base_group_when_group_is_empty () {
+		ApiRouter<String, String> router = API.configure (base -> {
+			base.group ("/", api -> api.version ("a.1.0").route ("a.1.0:users", "/users", name -> name));
+			base.group ("", api -> api.version ("a.1.0").route ("a.1.0:companies", "/companies", name -> name));
+			base.group (null, api -> api.version ("a.1.0").route ("a.1.0:accounts", "/accounts", name -> name));
+		});
+
+		assertThat (router.toId (GET, "a.1.0", "/users", new String [] { "users" }), is ("a.1.0:users"));
+		assertThat (router.toId (GET, "a.1.0", "/companies", new String [] { "companies" }), is ("a.1.0:companies"));
+		assertThat (router.toId (GET, "a.1.0", "/accounts", new String [] { "accounts" }), is ("a.1.0:accounts"));
+	}
+
+	@Test
+	public void it_should_configure_the_group_main_path_if_the_route_is_empty () {
+		ApiRouter<String, String> router = API.configure (base -> {
+			base.group ("/users", api -> api.version ("a.1.0").route ("a.1.0:users", "/", name -> name));
+			base.group ("/companies", api -> api.version ("a.1.0").route ("a.1.0:companies", "", name -> name));
+			base.group ("/accounts", api -> api.version ("a.1.0").route ("a.1.0:accounts", (String) null, name -> name));
+		});
+
+		assertThat (router.toId (GET, "a.1.0", "/users", new String [] { "users" }), is ("a.1.0:users"));
+		assertThat (router.toId (GET, "a.1.0", "/companies", new String [] { "companies" }), is ("a.1.0:companies"));
+		assertThat (router.toId (GET, "a.1.0", "/accounts", new String [] { "accounts" }), is ("a.1.0:accounts"));
 	}
 
 	@Test
@@ -182,33 +227,35 @@ public class APITest {
 	}
 
 	@Test
-	public void it_should_understard_groups_with_just_a_root_path () {
-		ApiRouter<String, String> router = API.configure (api -> {
-			api.group ("/", root -> {
-				root.route ("user", "/users/:id", name -> name);
-			});
-		});
-
-		String id = router.toId (GET, "current", "/users/1", API.splitParts ("/users/1"));
-		assertThat (id, is ("user"));
-	}
-
-	@Test
 	public void it_should_split_a_descriptor () {
 		String [] parts = API.splitParts ("/path/to/file.ext");
 		assertThat (parts, arrayContaining ("path", "to", "file.ext"));
 	}
 
 
-	@Test (expected = Exception.class)
+	@Test
 	public void it_should_complain_when_it_ends_with_a_trailing_slash () {
-		API.splitParts ("/path/to/dir/");
+		assertThrows (Exception.class, () -> {
+			API.splitParts ("/path/to/dir/");
+		});
 	}
 
 	@Test
 	public void it_should_not_complain_when_save_splitting_a_descriptor () {
 		String [] parts = API.saveSplitParts ("/path/to/dir/");
 		assertThat (parts, arrayContaining ("path", "to", "dir"));
+	}
+
+	@Test
+	public void it_should_save_split_without_the_trailing_slash () {
+		String [] parts = API.saveSplitParts ("/path/to/dir");
+		assertThat (parts, arrayContaining ("path", "to", "dir"));
+	}
+
+	@Test
+	public void it_should_split_the_root_in_an_array_with_empty_string () {
+		String [] parts = API.saveSplitParts ("/");
+		assertThat (parts, arrayContaining (""));
 	}
 
 }
