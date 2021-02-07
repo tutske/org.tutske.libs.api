@@ -2,7 +2,7 @@ package org.tutske.lib.api.jwt;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.any;
 import static org.tutske.lib.api.jwt.JsonWebToken.Keys.*;
@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.tutske.lib.json.Mappers;
 
 import java.io.IOException;
@@ -175,14 +175,16 @@ public class JsonWebTokenTest {
 		assertThat (token.getAs (Headers, new TypeReference<Map<String, Object>> () {}), not (nullValue ()));
 	}
 
-	@Test (expected = IllegalArgumentException.class)
 	public void it_should_complain_when_creating_a_token_with_incorrect_parts () {
-		new JsonWebToken (new ObjectMapper (), new byte [2288][]);
+		assertThrows (IllegalArgumentException.class, () -> {
+			new JsonWebToken (new ObjectMapper (), new byte [2288][]);
+		});
 	}
 
-	@Test (expected = IllegalArgumentException.class)
 	public void it_should_complain_when_creating_from_a_string_with_incorrect_parts () {
-		JsonWebToken.fromTokenString ("..........................................");
+		assertThrows (IllegalArgumentException.class, () -> {
+			JsonWebToken.fromTokenString ("..........................................");
+		});
 	}
 
 	@Test

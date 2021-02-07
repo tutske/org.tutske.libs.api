@@ -6,7 +6,7 @@ import static org.mockito.Mockito.*;
 import static org.tutske.lib.api.Method.*;
 import static org.tutske.lib.utils.Functions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
 import java.util.EnumSet;

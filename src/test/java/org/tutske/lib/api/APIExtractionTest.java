@@ -4,7 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.tutske.lib.api.Method.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.tutske.lib.utils.Bag;
 
 import java.util.Collections;

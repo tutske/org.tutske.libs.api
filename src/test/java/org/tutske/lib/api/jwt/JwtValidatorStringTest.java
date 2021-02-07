@@ -1,9 +1,10 @@
 package org.tutske.lib.api.jwt;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.tutske.lib.api.exceptions.InvalidJwtException;
 
 import java.time.Clock;
@@ -54,46 +55,58 @@ public class JwtValidatorStringTest {
 		new JwtValidator (clock, new JwtValidator.Config ()).assureValid ((String) null);
 	}
 
-	@Test (expected = InvalidJwtException.class)
+	@Test
 	public void it_should_reject_tokens_when_validate_method_fails () {
 		JwtValidator.Config config = new JwtValidator.Config () {{
 			validate = (jwt, hash) -> false;
 			forceToken = false;
 		}};
 		JsonWebToken token = JsonWebToken.fromData (new Auth ("john"));
-		new JwtValidator (clock, config).assureValid (token.toString ());
+		assertThrows (InvalidJwtException.class, () -> {
+			new JwtValidator (clock, config).assureValid (token.toString ());
+		});
 	}
 
-	@Test (expected = InvalidJwtException.class)
+	@Test
 	public void it_should_nat_validate_missing_string_tokens_in_strict_mode () {
 		JwtValidator.Config config = new JwtValidator.Config (base) {{ forceToken = true; }};
-		new JwtValidator (clock, config).assureValid ((String) null);
+		assertThrows (InvalidJwtException.class, () -> {
+			new JwtValidator (clock, config).assureValid ((String) null);
+		});
 	}
 
-	@Test (expected = InvalidJwtException.class)
+	@Test
 	public void it_should_reject_tokens_with_an_invalid_exp_time () {
 		JsonWebToken token = JsonWebToken.fromData (new Auth ("john", yesterday, yesterday));
-		new JwtValidator (clock, base).assureValid (token.toString ());
+		assertThrows (InvalidJwtException.class, () -> {
+			new JwtValidator (clock, base).assureValid (token.toString ());
+		});
 	}
 
-	@Test (expected = InvalidJwtException.class)
+	@Test
 	public void it_should_reject_tokens_with_an_invalid_iat_time () {
 		JsonWebToken token = JsonWebToken.fromData (new Auth ("john", tomorrow, tomorrow));
-		new JwtValidator (clock, base).assureValid (token.toString ());
+		assertThrows (InvalidJwtException.class, () -> {
+			new JwtValidator (clock, base).assureValid (token.toString ());
+		});
 	}
 
-	@Test (expected = InvalidJwtException.class)
+	@Test
 	public void it_should_reject_tokens_with_an_invalid_nbt_time () {
 		Auth auth = new Auth ("john");
 		auth.nbt = tomorrow;
-		new JwtValidator (clock, base).assureValid (JsonWebToken.fromData (auth).toString ());
+		assertThrows (InvalidJwtException.class, () -> {
+			new JwtValidator (clock, base).assureValid (JsonWebToken.fromData (auth).toString ());
+		});
 	}
 
-	@Test (expected = InvalidJwtException.class)
+	@Test
 	public void it_should_reject_tokens_without_an_exp_time () {
 		Auth auth = new Auth ("john");
 		auth.exp = null;
-		new JwtValidator (clock, base).assureValid (JsonWebToken.fromData (auth).toString ());
+		assertThrows (InvalidJwtException.class, () -> {
+			new JwtValidator (clock, base).assureValid (JsonWebToken.fromData (auth).toString ());
+		});
 	}
 
 	@Test
@@ -111,12 +124,14 @@ public class JwtValidatorStringTest {
 		new JwtValidator (clock, base).assureValid (JsonWebToken.fromData (auth).toString ());
 	}
 
-	@Test (expected = InvalidJwtException.class)
+	@Test
 	public void it_should_accept_tokens_without_an_iat_time_in_force_mode () {
 		Auth auth = new Auth ("john");
 		auth.iat = null;
 		JwtValidator.Config config = new JwtValidator.Config (base) {{ forceIAT = true; }};
-		new JwtValidator (clock, config).assureValid (JsonWebToken.fromData (auth).toString ());
+		assertThrows (InvalidJwtException.class, () -> {
+			new JwtValidator (clock, config).assureValid (JsonWebToken.fromData (auth).toString ());
+		});
 	}
 
 	@Test
@@ -126,17 +141,21 @@ public class JwtValidatorStringTest {
 		new JwtValidator (clock, base).assureValid (JsonWebToken.fromData (auth).toString ());
 	}
 
-	@Test (expected = InvalidJwtException.class)
+	@Test
 	public void it_should_accept_tokens_without_an_nbt_time_in_force_mode () {
 		Auth auth = new Auth ("john");
 		auth.nbt = null;
 		JwtValidator.Config config = new JwtValidator.Config (base) {{ forceNBT = true; }};
-		new JwtValidator (clock, config).assureValid (JsonWebToken.fromData (auth).toString ());
+		assertThrows (InvalidJwtException.class, () -> {
+			new JwtValidator (clock, config).assureValid (JsonWebToken.fromData (auth).toString ());
+		});
 	}
 
-	@Test (expected = InvalidJwtException.class)
+	@Test
 	public void it_should_fail_on_an_unparsable_token () {
-		new JwtValidator (clock, base).assureValid ("not.a.valid.token");
+		assertThrows (InvalidJwtException.class, () -> {
+			new JwtValidator (clock, base).assureValid ("not.a.valid.token");
+		});
 	}
 
 }

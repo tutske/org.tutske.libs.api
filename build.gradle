@@ -15,9 +15,9 @@ dependencies {
 		[ group: 'org.tutske.libs', name: 'org.tutske.libs.json', version: '[a.2.0,)' ]
 	)
 	testImplementation (
-		[ group: 'junit', name: 'junit', version: '[4,)'],
-		[ group: 'org.hamcrest', name: 'hamcrest-all', version: '[1,)' ],
-		[ group: 'org.mockito', name: 'mockito-all', version: '[1,)' ]
+		[ group: 'org.junit.jupiter', name: 'junit-jupiter', version: '[5,6)'],
+		[ group: 'org.hamcrest', name: 'hamcrest', version: '[2,)' ],
+		[ group: 'org.mockito', name: 'mockito-core', version: '[2,)' ]
 	)
 }
 
@@ -29,4 +29,8 @@ compileJava {
 		]
 		classpath = files ()
 	}
+}
+
+test {
+	useJUnitPlatform ()
 }

@@ -2,12 +2,13 @@ package org.tutske.lib.api;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.tutske.lib.utils.Functions.*;
 import static org.tutske.lib.api.Method.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.EnumSet;
@@ -232,9 +233,11 @@ public class APITest {
 	}
 
 
-	@Test (expected = Exception.class)
+	@Test
 	public void it_should_complain_when_it_ends_with_a_trailing_slash () {
-		API.splitParts ("/path/to/dir/");
+		assertThrows (Exception.class, () -> {
+			API.splitParts ("/path/to/dir/");
+		});
 	}
 
 	@Test

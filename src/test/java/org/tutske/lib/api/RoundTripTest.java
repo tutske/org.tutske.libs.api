@@ -6,7 +6,7 @@ import static org.tutske.lib.api.Matchers.isSuccess;
 import static org.tutske.lib.api.Method.GET;
 import static org.tutske.lib.utils.Functions.fn;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.tutske.lib.api.data.RawResponse;
 import org.tutske.lib.api.data.StringResponse;
 import org.tutske.lib.json.Json;
